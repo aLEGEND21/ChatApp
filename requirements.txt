@@ -1,4 +1,4 @@
 Flask>=2.0.2
-falsk_session>=2.0.1
+flask_session>=2.0.1
 Flask_SocketIO>=5.1.1
 python-dotenv>=0.20.0
