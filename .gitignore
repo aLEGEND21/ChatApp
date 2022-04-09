@@ -1,8 +1,10 @@
+# Ignore directories
 __pycache__/
 application/__pycache__/
 .vscode/
 flask_session/
 
+# Ignore files
 .env
 messages.db
 db_test.py

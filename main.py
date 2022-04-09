@@ -54,4 +54,3 @@ def on_message_send(data, methods=["POST"]):
 # Mainline
 if __name__ == "__main__":
     socketio.run(app, debug=Config.DEBUG, host=Config.SERVER)
-    
