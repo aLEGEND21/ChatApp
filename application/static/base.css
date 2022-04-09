@@ -1,0 +1,38 @@
+:root {
+    --blue-green: #ABD1C9FF;
+    --grey: #DFDCE5FF;
+    --yellow: #DBB04AFF;
+    --blue-grey: #97B3D0FF;
+}
+
+/* Background color classes */
+.bg-blue-green {
+    background-color: var(--blue-green);
+}
+.bg-grey {
+    background-color: var(--grey);
+}
+.bg-yellow {
+    background-color: var(--yellow);
+}
+.bg-blue-grey {
+    color: var(--blue-grey);
+}
+
+/* Text color classes */
+.text-blue-green {
+    color: var(--blue-green);
+}
+.text-grey {
+    color: var(--grey);
+}
+.text-yellow {
+    color: var(--yellow);
+}
+.text-blue-grey {
+    color: var(--blue-grey);
+}
+
+.mt--1 {
+    margin-top: -1rem;
+}

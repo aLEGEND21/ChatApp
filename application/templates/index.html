@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<head>
+    <!-- Import JS script to handle socket connections -->
+    <script src="/static/index.js"></script>
+</head>
+<body>
+    <style>
+        #message-container {
+            height: 30rem;
+            max-width: 50rem;
+            min-width: 25rem;
+            overflow-y: scroll;
+        }
+        #message-container::-webkit-scrollbar {
+            width: 0rem;
+        }
+    </style>
+    <div class="mx-auto border mt-5 bg-light" id="message-container">
+    </div>
+    <div class="text-center pt-3">
+        <p class="h6 text-center" id="username-display">Sending messages as _:</p>
+        <input class="text" id="send-box" style="min-width: 25rem" autocomplete="off">
+    </div>
+</body>
+{% endblock content %}
