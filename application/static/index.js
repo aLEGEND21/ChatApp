@@ -48,17 +48,17 @@ function addMessage (m) {
 // Create socket object
 var socket = io.connect(document.domain + ":" + location.port);
 var username;
-var room_code;
+var roomCode;
 
 // Fetch username on connection and send "client connected" event to the server
 socket.on("connect", async function () {
     username = await getUsername();
-    room_code = await getRoomCode();
+    roomCode = await getRoomCode();
     document.getElementById("username-display").innerText = `Sending messages as ${username}:`;
-    if (room_code == "GLOBAL") {
+    if (roomCode == "GLOBAL") {
         document.getElementById("room-code-display").innerText = `Chatting in Global Chat`;
     } else {
-        document.getElementById("room-code-display").innerText = `Room Code: ${room_code}`;
+        document.getElementById("room-code-display").innerText = `Room Code: ${roomCode}`;
     }
     socket.emit("client connected");
 })
@@ -67,7 +67,7 @@ socket.on("connect", async function () {
 socket.on("after connection", async function (data) {
     let messages = data.data;
     messages.forEach(m => {
-        if (m.room_code == room_code) {
+        if (m.room_code == roomCode) {
             addMessage(m);
         }
     });
@@ -75,7 +75,7 @@ socket.on("after connection", async function (data) {
 
 // Display new message onto the screen when the server sends the message data
 socket.on("new message", async function (message) {
-    if (message.room_code == room_code) {
+    if (message.room_code == roomCode) {
         addMessage(message);
     }
 })
@@ -88,7 +88,7 @@ document.addEventListener("keypress", function (event) {
             socket.emit("send message", {
                 "content": sendBox.value,
                 "author_username": username,
-                "room_code": room_code
+                "room_code": roomCode
             });
             sendBox.value = "";
         }
