@@ -3,6 +3,7 @@
 from flask_session import Session
 from flask_socketio import SocketIO
 from flask_socketio import emit
+from flask import session
 
 from config import Config
 from application.database import DataBase
@@ -28,9 +29,10 @@ socketio = SocketIO(app)
 
 @socketio.on('client connected')
 def on_connect():
-    """Sends all messages from the database to the client on connection."""
+    """Sends all messages from the database with the same room code as the client to the client 
+    on connection."""
     db = DataBase()
-    messages = db.get_all_messages()
+    messages = db.get_room_messages(session.get("room_code"))
     # Convert message objects to json
     message_data = []
     for m in messages:
@@ -40,13 +42,15 @@ def on_connect():
 @socketio.on('send message')
 def on_message_send(data, methods=["POST"]):
     """Handles socket connections related to when a user sends a message. The message is
-    added to the database and then broadcast to all connected clients.
+    added to the database and then broadcast to all connected clients. The client will 
+    check whether the room code matches the client's room code and then display the message
+    if it does.
 
     Args:
         data (dict): The message data that is generated when a user sends a message.
     """
     data = dict(data)
-    m = Message(data["content"], data["author_username"])
+    m = Message(data["content"], data["author_username"], data["room_code"])
     db = DataBase()
     db.add_message(m)
     emit('new message', m.to_dict(), broadcast=True)

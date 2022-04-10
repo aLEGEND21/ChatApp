@@ -8,6 +8,16 @@ async function getUsername () {
         });
 }
 
+async function getRoomCode () {
+    return await fetch("/api/get_room_code")
+        .then(async function (resp) {
+            return await resp.json();
+        })
+        .then(function (data) {
+            return data["room_code"]
+        });
+}
+
 function addMessage (m) {
     let messageContainer = document.getElementById("message-container");
     let messageDiv = document.createElement("div");
@@ -38,10 +48,13 @@ function addMessage (m) {
 // Create socket object
 var socket = io.connect(document.domain + ":" + location.port);
 var username;
+var room_code;
 
 // Fetch username on connection and send "client connected" event to the server
 socket.on("connect", async function () {
     username = await getUsername();
+    room_code = await getRoomCode();
+    console.log(room_code);
     document.getElementById("username-display").innerText = `Sending messages as ${username}:`;
     socket.emit("client connected");
 })
@@ -50,13 +63,17 @@ socket.on("connect", async function () {
 socket.on("after connection", async function (data) {
     let messages = data.data;
     messages.forEach(m => {
-        addMessage(m);
+        if (m.room_code == room_code) {
+            addMessage(m);
+        }
     });
 })
 
 // Display new message onto the screen when the server sends the message data
 socket.on("new message", async function (message) {
-    addMessage(message);
+    if (message.room_code == room_code) {
+        addMessage(message);
+    }
 })
 
 // Send a message every time the user clicks the enter key
@@ -65,7 +82,8 @@ document.addEventListener("keypress", function (event) {
         sendBox = document.getElementById("send-box");
         socket.emit("send message", {
             "content": sendBox.value,
-            "author_username": username
+            "author_username": username,
+            "room_code": room_code
         });
         sendBox.value = "";
     }

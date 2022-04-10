@@ -25,7 +25,9 @@ def login():
     # Handle internal request containing the user input from the login page
     if request.method == "POST":
         username = request.form.to_dict()["username"]
+        #room_code = request.form.to_dict()["room_code"]
         session["username"] = username # Save the username from the request form to the session var
+        session["room_code"] = "GLOBAL"
         return redirect(url_for("views.home"))
     # Handle the user navigating to the login page
     else:
@@ -38,12 +40,14 @@ def login():
 
 @view.route("/logout")
 def logout():
-    """Logs out the user from the application by popping the username from the session dictionary.
+    """Logs out the user from the application by popping the username and room code from the session 
+    dictionary.
 
     Returns:
         None: Displays the login page for the user.
     """
     session.pop("username", None)
+    session.pop("room_code", None)
     return redirect(url_for("views.login"))
 
 
@@ -77,3 +81,13 @@ def get_username():
         dict: A dict containing the user's username
     """
     return {"username": session.get("username")}
+
+@view.route("/api/get_room_code")
+def get_room_code():
+    """Returns the room code associated with the current session. This is useful for retriving the room
+    code so that messages can be organized by room.
+
+    Returns:
+        dict: A dict containing the room code
+    """
+    return {"room_code": session.get("room_code")}
