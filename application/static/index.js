@@ -84,11 +84,13 @@ socket.on("new message", async function (message) {
 document.addEventListener("keypress", function (event) {
     if (event.key == "Enter") {
         sendBox = document.getElementById("send-box");
-        socket.emit("send message", {
-            "content": sendBox.value,
-            "author_username": username,
-            "room_code": room_code
-        });
-        sendBox.value = "";
+        if (sendBox.value != "") {
+            socket.emit("send message", {
+                "content": sendBox.value,
+                "author_username": username,
+                "room_code": room_code
+            });
+            sendBox.value = "";
+        }
     }
 });
