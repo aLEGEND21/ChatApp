@@ -54,8 +54,12 @@ var room_code;
 socket.on("connect", async function () {
     username = await getUsername();
     room_code = await getRoomCode();
-    console.log(room_code);
     document.getElementById("username-display").innerText = `Sending messages as ${username}:`;
+    if (room_code == "GLOBAL") {
+        document.getElementById("room-code-display").innerText = `Chatting in Global Chat`;
+    } else {
+        document.getElementById("room-code-display").innerText = `Room Code: ${room_code}`;
+    }
     socket.emit("client connected");
 })
 

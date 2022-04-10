@@ -25,9 +25,9 @@ def login():
     # Handle internal request containing the user input from the login page
     if request.method == "POST":
         username = request.form.to_dict()["username"]
-        #room_code = request.form.to_dict()["room_code"]
+        room_code = request.form.to_dict()["room_code"]
         session["username"] = username # Save the username from the request form to the session var
-        session["room_code"] = "GLOBAL"
+        session["room_code"] = room_code if room_code != "" else "GLOBAL"
         return redirect(url_for("views.home"))
     # Handle the user navigating to the login page
     else:
