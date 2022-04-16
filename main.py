@@ -33,6 +33,7 @@ def on_connect():
     on connection."""
     db = DataBase()
     messages = db.get_room_messages(session.get("room_code"))
+    db.close()
     # Convert message objects to json
     message_data = []
     for m in messages:
@@ -53,6 +54,7 @@ def on_message_send(data, methods=["POST"]):
     m = Message(data["content"], data["author_username"], data["room_code"])
     db = DataBase()
     db.add_message(m)
+    db.close()
     emit('new message', m.to_dict(), broadcast=True)
 
 # Mainline

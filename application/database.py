@@ -30,6 +30,12 @@ class DataBase:
         self.cursor.execute(query)
         self.conn.commit()
     
+    def close(self):
+        """Closes the database connection. This should be run once the database instance is
+        no longer needed.
+        """
+        self.conn.close()
+    
     def add_message(self, msg_object: Message):
         query = """INSERT INTO Messages(content, author_username, timestamp, room_code, id)
                 VALUES (?,?,?,?,?)"""
