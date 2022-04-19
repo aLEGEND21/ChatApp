@@ -5,6 +5,7 @@ application/__pycache__/
 flask_session/
 
 # Ignore files
+TODO
 .env
 messages.db
 db_test.py
