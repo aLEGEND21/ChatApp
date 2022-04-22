@@ -1,10 +1,8 @@
-async function getUsername () {
-    return await fetch("/api/get_username")
+// ---NEW---
+async function getUser () {
+    return await fetch("/api/get_user")
         .then(async function (resp) {
             return await resp.json();
-        })
-        .then(function (data) {
-            return data["username"];
         });
 }
 
@@ -23,7 +21,7 @@ function addMessage (m) {
     let messageDiv = document.createElement("div");
     messageContainer.appendChild(messageDiv);
     // Change the color of the message depending on who sent it
-    if (m.author_username == username) {
+    if (m.author_username == userData.username) {
         var content =  `<div class="pt-4 pb-2 pl-5 pr-5 bg-grey">
                             <div class="d-flex">
                                 <span class="h6"><strong>You</strong></span>
@@ -47,14 +45,14 @@ function addMessage (m) {
 
 // Create socket object
 var socket = io.connect(document.domain + ":" + location.port);
-var username;
+var userData;
 var roomCode;
 
 // Fetch username on connection and send "client connected" event to the server
 socket.on("connect", async function () {
-    username = await getUsername();
+    userData = await getUser();
     roomCode = await getRoomCode();
-    document.getElementById("username-display").innerText = `Sending messages as ${username}:`;
+    document.getElementById("username-display").innerText = `Sending messages as ${userData.username}:`;
     if (roomCode == "GLOBAL") {
         document.getElementById("room-code-display").innerText = `Chatting in Global Chat`;
     } else {
@@ -87,7 +85,8 @@ document.addEventListener("keypress", function (event) {
         if (sendBox.value != "") {
             socket.emit("send message", {
                 "content": sendBox.value,
-                "author_username": username,
+                "author_id": userData.user_id,
+                "author_username": userData.username,
                 "room_code": roomCode
             });
             sendBox.value = "";

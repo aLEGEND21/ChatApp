@@ -4,6 +4,7 @@ from flask import render_template
 from flask import url_for
 from flask import request
 from flask import session
+from application.database import DataBase
 
 
 # Create the blueprint
@@ -25,8 +26,17 @@ def login():
     # Handle internal request containing the user input from the login page
     if request.method == "POST":
         username = request.form.to_dict()["username"]
+        password = request.form.to_dict()["password"]
         room_code = request.form.to_dict()["room_code"]
+        # Check if the user was found. If they were then add the user_id to the session
+        db = DataBase()
+        u = db.get_user_by_credentials(username, password)
+        db.close()
+        if u == False: return redirect(url_for("views.login"))
+        # Add the user data to the session
         session["username"] = username # Save the username from the request form to the session var
+        session["password"] = password
+        session["user_id"] = u.user_id
         session["room_code"] = room_code if room_code != "" else "GLOBAL"
         return redirect(url_for("views.home"))
     # Handle the user navigating to the login page
@@ -72,7 +82,8 @@ def home():
 # API
 
 
-@view.route("/api/get_username")
+# DEPRECATED
+'''@view.route("/api/get_username")
 def get_username():
     """Returns the username associated with the current session. This can be used by the socket in order
     to get the client's username.
@@ -80,7 +91,22 @@ def get_username():
     Returns:
         dict: A dict containing the user's username
     """
-    return {"username": session.get("username")}
+    return {"username": session.get("username")}'''
+
+@view.route("/api/get_user")
+def get_user():
+    """Returns the json user data that is associated with the current session. The data will contain the
+    user's username and other information.
+
+    Returns:
+        dict: A dict containing the user data
+    """
+    db = DataBase()
+    print(session.get("user_id"))
+    u = db.get_user_by_id(session.get("user_id"))
+    u_dict = u.to_dict()
+    u_dict.pop("password")
+    return u_dict
 
 @view.route("/api/get_room_code")
 def get_room_code():

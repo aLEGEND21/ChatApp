@@ -8,4 +8,5 @@ flask_session/
 TODO
 .env
 messages.db
+database.db
 db_test.py

@@ -5,7 +5,7 @@ import random
 
 class Message:
 
-    def __init__(self, content: str, author_username: str, room_code: str="GLOBAL"):
+    def __init__(self, content: str, author_id: int, author_username: str, room_code: str="GLOBAL"):
         """Initalizese a new message object containing the message content, author username, timestamp
         formatted as a datetime, the pretty timestamp (a more readable string), and the message id
 
@@ -14,6 +14,7 @@ class Message:
             author_username (str): The username of the user who sent the message
         """
         self.content = content
+        self.author_id = author_id
         self.author_username = author_username
         self.timestamp = datetime.datetime.now()
         self.pretty_timestamp = self.timestamp.strftime("%I:%M %p on %A, %B %d %Y")
@@ -23,19 +24,20 @@ class Message:
     def to_dict(self):
         return {
             "content": self.content,
+            "author_id": self.author_id,
             "author_username": self.author_username,
             "timestamp": self.pretty_timestamp,
             "room_code": self.room_code
         }
 
     @classmethod
-    def construct_message(cls, content: str, author_username: str, timestamp: datetime, room_code: str, msg_id: int):
+    def construct_message(cls, content: str, author_id: int, author_username: str, timestamp: datetime, room_code: str, msg_id: int):
         """Constructs a message object using pre-existing message data provided
         as the arguments.
 
         Args:
             content (str): The content of the message
-            author_username (str): The username of the user who sent the message
+            author_id (int): The user_id of the user who sent the message
             timestamp (datetime): The datetime timestamp of the message
             msg_id (int): The unique id of the message
 
@@ -44,7 +46,7 @@ class Message:
         """
         if type(timestamp == str):
             timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f")
-        m = Message(content, author_username, room_code)
+        m = Message(content, author_id, author_username, room_code)
         m.timestamp = timestamp
         m.pretty_timestamp = m.timestamp.strftime("%I:%M %p on %A, %B %d %Y")
         m.msg_id = msg_id

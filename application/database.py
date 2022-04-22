@@ -2,11 +2,12 @@ import sqlite3
 import copy
 
 from .message import Message
+from .user import User
 
 
 class DataBase:
 
-    def __init__(self, db_path="messages.db"):
+    def __init__(self, db_path="database.db"):
         """Attempt to create a connection to the database via the provided path. Additionally,
         the cursor from the connection is saved.
 
@@ -19,14 +20,21 @@ class DataBase:
             print(e)
         else:
             self.cursor = self.conn.cursor()
+            self._create_users_table()
             self._create_messages_table()
+    
+    def _create_users_table(self):
+        query = f"""CREATE TABLE IF NOT EXISTS Users
+                (username TEXT, password TEXT, user_id INTEGER PRIMARY KEY)"""
+        self.cursor.execute(query)
+        self.conn.commit()
     
     def _create_messages_table(self):
         """Create the table containing all messages in the database. If the table already exists,
         then do not create the table.
         """
         query = f"""CREATE TABLE IF NOT EXISTS Messages 
-                (content TEXT, author_username TEXT, timestamp Date, room_code TEXT, id INTEGER PRIMARY KEY)"""
+                (content TEXT, author_id INTEGER, author_username TEXT, timestamp Date, room_code TEXT, id INTEGER PRIMARY KEY)"""
         self.cursor.execute(query)
         self.conn.commit()
     
@@ -36,10 +44,55 @@ class DataBase:
         """
         self.conn.close()
     
+    def add_user(self, user_object: User):
+        query = """INSERT INTO Users(username, password, user_id) VALUES (?,?,?)"""
+        self.cursor.execute(query, (user_object.username, user_object.password, user_object.user_id))
+        self.conn.commit()
+    
+    def get_user_by_id(self, user_id):
+        # Make the query to get the user from the database
+        query = """SELECT * FROM Users WHERE user_id = ?"""
+        user_tuples = self.cursor.execute(query, (str(user_id),)).fetchall()
+        
+        # Check if the user was found
+        if len(user_tuples) == 0:
+            return False
+        else:
+            user_tuple = user_tuples[0]
+
+        # Construct the user object using the user tuple data
+        u = User(
+            user_tuple[0],
+            user_tuple[1],
+            user_tuple[2]
+        )
+
+        return u
+    
+    def get_user_by_credentials(self, username: str, password: str):
+        # Make the query to get the user from the database
+        query = """SELECT * FROM Users WHERE username = ? AND password = ?"""
+        user_tuples = self.cursor.execute(query, (username, password)).fetchall()
+        
+        # Check if the user was found
+        if len(user_tuples) == 0:
+            return False
+        else:
+            user_tuple = user_tuples[0]
+
+        # Construct the user object using the user tuple data
+        u = User(
+            user_tuple[0],
+            user_tuple[1],
+            user_tuple[2]
+        )
+
+        return u
+    
     def add_message(self, msg_object: Message):
-        query = """INSERT INTO Messages(content, author_username, timestamp, room_code, id)
-                VALUES (?,?,?,?,?)"""
-        self.cursor.execute(query, (msg_object.content, msg_object.author_username, msg_object.timestamp, msg_object.room_code, msg_object.msg_id))
+        query = """INSERT INTO Messages(content, author_id, author_username, timestamp, room_code, id)
+                VALUES (?,?,?,?,?,?)"""
+        self.cursor.execute(query, (msg_object.content, msg_object.author_id, msg_object.author_username, msg_object.timestamp, msg_object.room_code, msg_object.msg_id))
         self.conn.commit()
     
     def get_all_messages(self):
@@ -56,7 +109,7 @@ class DataBase:
         # Construct the Message objects from the tuple data
         messages = []
         for msg in message_tuples:
-            m = Message.construct_message(msg[0], msg[1], msg[2], msg[3], msg[4])
+            m = Message.construct_message(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5])
             messages.append(m)
         
         # Sort the messages from old -> new
@@ -81,13 +134,13 @@ class DataBase:
 
         # Remove the messages that are not from the correct room
         for msg in copy.copy(message_tuples):
-            if msg[3] != room_code:
+            if msg[4] != room_code:
                 message_tuples.remove(msg)
         
         # Construct the Message objects from the remaining tuple data
         messages = []
         for msg in message_tuples:
-            m = Message.construct_message(msg[0], msg[1], msg[2], msg[3], msg[4])
+            m = Message.construct_message(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5])
             messages.append(m)
         
         # Sort the messages from old -> new

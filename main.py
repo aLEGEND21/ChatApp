@@ -51,7 +51,7 @@ def on_message_send(data, methods=["POST"]):
         data (dict): The message data that is generated when a user sends a message.
     """
     data = dict(data)
-    m = Message(data["content"], data["author_username"], data["room_code"])
+    m = Message(data["content"], data["author_id"], data["author_username"], data["room_code"])
     db = DataBase()
     db.add_message(m)
     db.close()
