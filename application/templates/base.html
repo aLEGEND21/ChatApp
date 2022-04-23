@@ -34,7 +34,7 @@
                         <a class="nav-link" href="{{ url_for('views.home') }}">Home</a>
                     </li>
                     <!-- Display a login button if the user is not logged in. Otherwise, display a logout button. -->
-                    {% if session.get('username') is none %}
+                    {% if session.get('user') is none %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('views.login') }}">Login</a>
                         </li>
