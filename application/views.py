@@ -34,15 +34,13 @@ def login():
         db.close()
         if u == False: return redirect(url_for("views.login"))
         # Add the user data to the session
-        session["username"] = username # Save the username from the request form to the session var
-        session["password"] = password
-        session["user_id"] = u.user_id
+        session["user"] = u
         session["room_code"] = room_code if room_code != "" else "GLOBAL"
         return redirect(url_for("views.home"))
     # Handle the user navigating to the login page
     else:
         # Only display the login page if the user is not logged in. Otherwise, redirect to the home page
-        if session.get("username") is None:
+        if session.get("user") is None:
             return render_template("login.html")
         else:
             return redirect(url_for("views.home"))
@@ -50,13 +48,13 @@ def login():
 
 @view.route("/logout")
 def logout():
-    """Logs out the user from the application by popping the username and room code from the session 
+    """Logs out the user from the application by popping the user object and room code from the session 
     dictionary.
 
     Returns:
         None: Displays the login page for the user.
     """
-    session.pop("username", None)
+    session.pop("user", None)
     session.pop("room_code", None)
     return redirect(url_for("views.login"))
 
@@ -72,7 +70,7 @@ def home():
             not logged in.
     """
     # Display the home page if the user's username is in the session dict
-    if session.get("username") is not None:
+    if session.get("user") is not None:
         return render_template("index.html")
     # Otherwise, this redirects to the login page
     else:
@@ -102,8 +100,7 @@ def get_user():
         dict: A dict containing the user data
     """
     db = DataBase()
-    print(session.get("user_id"))
-    u = db.get_user_by_id(session.get("user_id"))
+    u = db.get_user_by_id(session.get("user").user_id)
     u_dict = u.to_dict()
     u_dict.pop("password")
     return u_dict

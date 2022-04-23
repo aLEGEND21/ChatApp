@@ -6,9 +6,10 @@ from .message import Message
 
 class User:
 
-    def __init__(self, username: str, password: str, user_id: int = None):#, messages: list[Message] = []):
+    def __init__(self, username: str, password: str, user_type: int = 0, user_id: int = None):#, messages: list[Message] = []):
         self.username = username
         self.password = password
+        self.user_type = user_type # 0 is normal and 1 is superuser
         self.user_id = user_id
         #self.messages = messages
 
@@ -32,6 +33,7 @@ class User:
             "username": self.username,
             "password": self.password,
             #"messages": messages,
+            "user_type": self.user_type,
             "user_id": self.user_id
         }
     

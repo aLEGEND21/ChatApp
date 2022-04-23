@@ -25,7 +25,7 @@ class DataBase:
     
     def _create_users_table(self):
         query = f"""CREATE TABLE IF NOT EXISTS Users
-                (username TEXT, password TEXT, user_id INTEGER PRIMARY KEY)"""
+                (username TEXT, password TEXT, user_type INTEGER, user_id INTEGER PRIMARY KEY)"""
         self.cursor.execute(query)
         self.conn.commit()
     
@@ -45,8 +45,8 @@ class DataBase:
         self.conn.close()
     
     def add_user(self, user_object: User):
-        query = """INSERT INTO Users(username, password, user_id) VALUES (?,?,?)"""
-        self.cursor.execute(query, (user_object.username, user_object.password, user_object.user_id))
+        query = """INSERT INTO Users(username, password, user_type, user_id) VALUES (?,?,?,?)"""
+        self.cursor.execute(query, (user_object.username, user_object.password, user_object.user_type, user_object.user_id))
         self.conn.commit()
     
     def get_user_by_id(self, user_id):
@@ -64,7 +64,8 @@ class DataBase:
         u = User(
             user_tuple[0],
             user_tuple[1],
-            user_tuple[2]
+            user_tuple[2],
+            user_tuple[3]
         )
 
         return u
@@ -84,7 +85,8 @@ class DataBase:
         u = User(
             user_tuple[0],
             user_tuple[1],
-            user_tuple[2]
+            user_tuple[2],
+            user_tuple[3]
         )
 
         return u
