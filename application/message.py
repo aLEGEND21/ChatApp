@@ -27,6 +27,7 @@ class Message:
             "author_id": self.author_id,
             "author_username": self.author_username,
             "timestamp": self.pretty_timestamp,
+            "msg_id": self.msg_id,
             "room_code": self.room_code
         }
 

@@ -55,6 +55,7 @@ def on_message_send(data, methods=["POST"]):
     db.close()
     emit('new message', m.to_dict(), broadcast=True)
 
+
 # Mainline
 if __name__ == "__main__":
     socketio.run(app, debug=Config.DEBUG, host=Config.SERVER)

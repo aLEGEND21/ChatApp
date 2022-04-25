@@ -34,7 +34,7 @@ class DataBase:
         then do not create the table.
         """
         query = f"""CREATE TABLE IF NOT EXISTS Messages 
-                (content TEXT, author_id INTEGER, author_username TEXT, timestamp Date, room_code TEXT, id INTEGER PRIMARY KEY)"""
+                (content TEXT, author_id INTEGER, author_username TEXT, timestamp Date, room_code TEXT, msg_id INTEGER PRIMARY KEY)"""
         self.cursor.execute(query)
         self.conn.commit()
     
@@ -49,6 +49,30 @@ class DataBase:
         self.cursor.execute(query, (user_object.username, user_object.password, user_object.user_type, user_object.user_id))
         self.conn.commit()
     
+    def get_all_users(self):
+        """Gets all users from the database and converts them into User objects.
+
+        Returns:
+            list[User]: A list of all users registered in the site
+        """
+        # Make the query to get all users from the database
+        query = """SELECT * FROM Users"""
+        all_users = self.cursor.execute(query)
+        
+        # Convert the user tuples into User objects
+        user_objects: list[User] = []
+        for user_tuple in all_users:
+            user_objects.append(
+                User(
+                    user_tuple[0],
+                    user_tuple[1],
+                    user_tuple[2],
+                    user_tuple[3]
+                )
+            )
+        
+        return user_objects
+
     def get_user_by_id(self, user_id):
         # Make the query to get the user from the database
         query = """SELECT * FROM Users WHERE user_id = ?"""
@@ -92,7 +116,7 @@ class DataBase:
         return u
     
     def add_message(self, msg_object: Message):
-        query = """INSERT INTO Messages(content, author_id, author_username, timestamp, room_code, id)
+        query = """INSERT INTO Messages(content, author_id, author_username, timestamp, room_code, msg_id)
                 VALUES (?,?,?,?,?,?)"""
         self.cursor.execute(query, (msg_object.content, msg_object.author_id, msg_object.author_username, msg_object.timestamp, msg_object.room_code, msg_object.msg_id))
         self.conn.commit()
