@@ -38,6 +38,20 @@ class DataBase:
         self.cursor.execute(query)
         self.conn.commit()
     
+    def perform_query(self, query):
+        """Performs the specified query. When using this function, make sure that the input query
+        is trusted as it is input directly into the database.
+
+        Args:
+            query (str): The sqlite query you wish to perform
+
+        Returns:
+            sqlite3.Cursor: The cursor object containing the result of the query
+        """
+        res = self.cursor.execute(query)
+        self.conn.commit()
+        return res
+    
     def close(self):
         """Closes the database connection. This should be run once the database instance is
         no longer needed.
@@ -173,3 +187,11 @@ class DataBase:
         messages.sort(key=lambda m: m.timestamp)
 
         return messages
+    
+    def delete_all_messages(self):
+        """Removes all messages from the Messages table. This preserves all tables in the database and
+        only deletes the content from the Messages table.
+        """
+        query = """DELETE FROM Messages"""
+        self.cursor.execute(query)
+        self.conn.commit()

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<head>
+</head>
+<body>
+    <div class="container pt-5">
+        <p class="display-4">All Users:</p>
+        {% for user in users %}
+            <div class="row pt-2">
+                <p class="h5 d-inline col-sm font-weight-light">Username: {{ user.username }}</p>
+                <p class="h5 d-inline col-sm font-weight-light">Password: {{ user.password }}</p>
+                <p class="h5 d-inline col-sm font-weight-light">User ID: {{ user.user_id }}</p>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+{% endblock content %}

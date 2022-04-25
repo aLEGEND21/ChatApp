@@ -76,3 +76,26 @@ def home():
     # Otherwise, this redirects to the login page
     else:
         return redirect(url_for("views.login"))
+
+@view.route("/users")
+def all_users():
+    """Displays all user accounts for the site. This url is reserved for only superusers.
+
+    Returns:
+        None: Displays a page containing all users if the logged in user is a superuser.
+    """
+    # Redirect user to login page if they aren't logged in
+    if session.get("user") is None:
+        return redirect(url_for("views.login"))
+    # Otherwise, check if they are a superuser. If they are, then display the page. Otherwise,
+    # redirect them to the home page.
+    else:
+        # Get all users from the database if the user is a superuser
+        if session.get("user").user_type == 1:
+            db = DataBase()
+            users = db.get_all_users()
+            db.close()
+            users.sort(key=lambda u: u.username)
+            return render_template("users.html", users=users)
+        else:
+            return redirect(url_for("views.home"))
