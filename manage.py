@@ -13,7 +13,8 @@ if action == 0:
 elif action == 1:
     username = input("Type the user's username: ")
     password = input("Type the user's password: ")
-    u = User(username, password)
+    user_type = int(input("Type the user type, 1 for superuser and 0 for regular user: "))
+    u = User(username, password, user_type)
     db = DataBase()
     db.add_user(u)
     db.close()
