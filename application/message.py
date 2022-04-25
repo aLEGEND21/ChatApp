@@ -1,4 +1,5 @@
 import datetime
+import pytz
 import time
 import random
 
@@ -16,7 +17,7 @@ class Message:
         self.content = content
         self.author_id = author_id
         self.author_username = author_username
-        self.timestamp = datetime.datetime.now()
+        self.timestamp = pytz.utc.localize(datetime.datetime.utcnow()).astimezone(pytz.timezone("US/Eastern")) # Conver the UTC timestamp into an EST timestamp using pytz
         self.pretty_timestamp = self.timestamp.strftime("%I:%M %p on %A, %B %d %Y")
         self.msg_id = int(str(round(time.time())) + str(random.randint(1000, 9999))) # Construct a random message id using the current time and a random number
         self.room_code = room_code
@@ -46,7 +47,7 @@ class Message:
             Message: A new message object
         """
         if type(timestamp == str):
-            timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f")
+            timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f%z")
         m = Message(content, author_id, author_username, room_code)
         m.timestamp = timestamp
         m.pretty_timestamp = m.timestamp.strftime("%I:%M %p on %A, %B %d %Y")
