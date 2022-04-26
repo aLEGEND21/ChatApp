@@ -6,6 +6,7 @@ from flask import request
 from flask import session
 
 from application.database import DataBase
+from application.utils import logged_in
 
 
 # Create the blueprint
@@ -62,40 +63,31 @@ def logout():
 
 @view.route("/")
 @view.route("/home")
+@logged_in
 def home():
     """Displays the main page for the site. This allows the user to send and recieve messages with
     others who are using the site as well.
 
     Returns:
-        None: Displays the main/home page of the site or redirects to the login page if the user is
-            not logged in.
+        None: Displays the main/home page of the site if the user is logged in.
     """
-    # Display the home page if the user's username is in the session dict
-    if session.get("user") is not None:
-        return render_template("index.html")
-    # Otherwise, this redirects to the login page
-    else:
-        return redirect(url_for("views.login"))
+    return render_template("index.html")
 
 @view.route("/users")
+@logged_in
 def all_users():
     """Displays all user accounts for the site. This url is reserved for only superusers.
 
     Returns:
         None: Displays a page containing all users if the logged in user is a superuser.
     """
-    # Redirect user to login page if they aren't logged in
-    if session.get("user") is None:
-        return redirect(url_for("views.login"))
-    # Otherwise, check if they are a superuser. If they are, then display the page. Otherwise,
-    # redirect them to the home page.
+    # Get all users from the database if the user is a superuser
+    if session.get("user").user_type == 1:
+        db = DataBase()
+        users = db.get_all_users()
+        db.close()
+        users.sort(key=lambda u: u.username)
+        return render_template("users.html", users=users)
+    # Redirect the user home if they are not a superuser
     else:
-        # Get all users from the database if the user is a superuser
-        if session.get("user").user_type == 1:
-            db = DataBase()
-            users = db.get_all_users()
-            db.close()
-            users.sort(key=lambda u: u.username)
-            return render_template("users.html", users=users)
-        else:
-            return redirect(url_for("views.home"))
+        return redirect(url_for("views.home"))

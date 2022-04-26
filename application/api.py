@@ -3,6 +3,7 @@ from flask import request
 from flask import session
 
 from application.database import DataBase
+from application.utils import logged_in
 
 
 api = Blueprint("api", __name__)
@@ -23,6 +24,7 @@ def get_username():
     return {"username": session.get("username")}'''
 
 @api.route("/get_user")
+@logged_in
 def get_user():
     """Returns the json user data that is associated with the current session. The data will contain the
     user's username and other information.
@@ -37,6 +39,7 @@ def get_user():
     return u_dict
 
 @api.route("/get_room_code")
+@logged_in
 def get_room_code():
     """Returns the room code associated with the current session. This is useful for retriving the room
     code so that messages can be organized by room.
