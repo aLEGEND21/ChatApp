@@ -90,6 +90,25 @@ def all_users():
     users.sort(key=lambda u: u.username)
     return render_template("users.html", users=users)
 
+@view.route("/create_claim_code", methods=["GET", "POST"])
+@is_superuser
+def create_claim_code():
+    if request.method == "POST":
+        # Extract the data from the request form and add it to the claim_codes list
+        data = request.form.to_dict()
+        new_claim_code = data["claim_code"]
+        recipient_username = data["recipient_username"]
+        claim_codes.append(
+            {
+                "claim_code": new_claim_code,
+                "username": recipient_username
+            }
+        )
+        # TODO: Make this flash a success message
+        return redirect(url_for("views.home"))
+    else:
+        return render_template("claim.html", superuser=True)
+
 @view.route("/claim_my_account", methods=["GET", "POST"])
 def claim_account():
     if request.method == "POST":
@@ -112,6 +131,11 @@ def claim_account():
         db.add_user(u)
         db.close()
         claim_codes.remove(code_data) # Delete the claim code
-        return f"Code: {code}, Username: {u.username}, Password: {password}, Confirm Password: {confirm_password}"
+        # TODO: Make this flash a success message including the user's username
+        return redirect(url_for("views.home"))
     else:
-        return render_template("claim.html")
+        # Prevent people from claiming an account if they are logged in
+        if session.get("user") is not None:
+            return redirect(url_for("views.home"))
+        else:
+            return render_template("claim.html")
