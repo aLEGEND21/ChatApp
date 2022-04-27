@@ -3,7 +3,9 @@ from flask import request
 from flask import session
 
 from application.database import DataBase
+from application.utils import is_superuser
 from application.utils import logged_in
+from application.utils import claim_codes
 
 
 api = Blueprint("api", __name__)
@@ -48,3 +50,11 @@ def get_room_code():
         dict: A dict containing the room code
     """
     return {"room_code": session.get("room_code")}
+
+@api.route("/create_claim_code", methods=["POST"])
+@is_superuser
+def create_claim_code():
+    # TODO: Parse the request containing the claim code data from the client side
+    # The request should contain the new user's username
+    # There should also be superuser validation
+    pass

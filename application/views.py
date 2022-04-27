@@ -6,7 +6,10 @@ from flask import request
 from flask import session
 
 from application.database import DataBase
+from application.user import User
+from application.utils import is_superuser
 from application.utils import logged_in
+from application.utils import claim_codes
 
 
 # Create the blueprint
@@ -74,20 +77,41 @@ def home():
     return render_template("index.html")
 
 @view.route("/users")
-@logged_in
+@is_superuser
 def all_users():
     """Displays all user accounts for the site. This url is reserved for only superusers.
 
     Returns:
         None: Displays a page containing all users if the logged in user is a superuser.
     """
-    # Get all users from the database if the user is a superuser
-    if session.get("user").user_type == 1:
+    db = DataBase()
+    users = db.get_all_users()
+    db.close()
+    users.sort(key=lambda u: u.username)
+    return render_template("users.html", users=users)
+
+@view.route("/claim_my_account", methods=["GET", "POST"])
+def claim_account():
+    if request.method == "POST":
+        # Extract the claim code data from the request dict
+        data = request.form.to_dict()
+        code = data["claim_code"]
+        password = data["password"]
+        confirm_password = data["confirm_password"]
+        # Check if the claim code is valid
+        for code_data in claim_codes:
+            if code_data["claim_code"] == code:
+                break
+        else:
+            return render_template("claim.html") # TODO: Make this flash invalid claim code
+        # Check if the passwords match
+        if password != confirm_password: return render_template("claim.html") # TODO: Make this flash passwords do not match
+        # Create the account and add it to the database
+        u = User(code_data["username"], password, 0)
         db = DataBase()
-        users = db.get_all_users()
+        db.add_user(u)
         db.close()
-        users.sort(key=lambda u: u.username)
-        return render_template("users.html", users=users)
-    # Redirect the user home if they are not a superuser
+        claim_codes.remove(code_data) # Delete the claim code
+        return f"Code: {code}, Username: {u.username}, Password: {password}, Confirm Password: {confirm_password}"
     else:
-        return redirect(url_for("views.home"))
+        return render_template("claim.html")

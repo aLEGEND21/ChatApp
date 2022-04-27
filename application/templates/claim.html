@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<head>
+</head>
+<body>
+    <!-- Account claim card -->
+    <div class="container pt-5 mt-5">
+        <div class="card mx-auto" style="width: 20rem" id="claim-card">
+            <div class="card-body text-center">
+                <h2 class="card-title">Log In</h2>
+                <form method="POST">
+                    <input type="text" name="claim_code" class="mb-2 text-center" placeholder="Claim Code" autocomplete="off">
+                    <input type="password" name="password" class="mb-2 text-center" placeholder="Password" autocomplete="off">
+                    <input type="password" name="confirm_password" class="mb-2 text-center" placeholder="Confirm Password" autocomplete="off"><br>
+                    <input type="submit" class="btn" value="Submit" style="background-color: var(--blue-green)">
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+{% endblock content %}

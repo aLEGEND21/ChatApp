@@ -16,3 +16,20 @@ def logged_in(func):
         else:
             return func(*args, **kwargs)
     return wrapper
+
+def is_superuser(func):
+    """Checks whether the user is a superuser before allowing them to access the url route. If 
+    they are not a superuser, they are redirected back to the home page.
+    """
+    @functools.wraps(func)
+    @logged_in
+    def wrapper(*args, **kwargs):
+        if session.get("user").user_type != 1:
+            return redirect(url_for("views.home"))
+        else:
+            return func(*args, **kwargs)
+    return wrapper
+
+
+# Variables
+claim_codes = [] # Contains all active claim codes in the application
