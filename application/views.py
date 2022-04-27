@@ -109,7 +109,7 @@ def create_claim_code():
     else:
         return render_template("claim.html", superuser=True)
 
-@view.route("/claim_my_account", methods=["GET", "POST"])
+@view.route("/claim_account", methods=["GET", "POST"])
 def claim_account():
     if request.method == "POST":
         # Extract the claim code data from the request dict

@@ -29,12 +29,19 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="nav-links">
+                <!-- Links on the left -->
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('views.home') }}">Home</a>
                     </li>
+                </ul>
+                <!-- Links on the right-->
+                <ul class="navbar-nav ml-auto">
                     <!-- Display a login button if the user is not logged in. Otherwise, display a logout button. -->
                     {% if session.get('user') is none %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('views.claim_account') }}">Claim Account</a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('views.login') }}">Login</a>
                         </li>
