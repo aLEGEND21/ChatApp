@@ -46,6 +46,12 @@
                             <a class="nav-link" href="{{ url_for('views.login') }}">Login</a>
                         </li>
                     {% else %}
+                        <!-- Add a link to creating claim codes if the user is a superuser-->
+                        {% if session.get('user').user_type == 1 %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('views.create_claim_code') }}">Create Claim Code</a>
+                            </li>
+                        {% endif %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('views.logout') }}">Logout</a>
                         </li>
