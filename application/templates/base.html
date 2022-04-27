@@ -61,6 +61,30 @@
         </div>
     </nav>
 
+    <!-- Displays flashed messages with category success to the screen. -->
+    {% with success_messages = get_flashed_messages(category_filter=["success"]) %}
+        {% for msg in success_messages %}
+            <div class="alert alert-success alert-dismissable fade show" role="alert">
+                {{ msg }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endwith %}
+
+    <!-- Displays flashed messages with category failure to the screen. -->
+    {% with failure_messages = get_flashed_messages(category_filter=["failure"]) %}
+        {% for msg in failure_messages %}
+            <div class="alert alert-danger alert-dismissable fade show" role="alert">
+                {{ msg }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endwith %}
+
     <div class="container">
         {% block content %}
         {% endblock content %}

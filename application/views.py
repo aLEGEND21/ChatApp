@@ -1,4 +1,5 @@
 from flask import Blueprint
+from flask import flash
 from flask import redirect
 from flask import render_template
 from flask import url_for
@@ -37,10 +38,14 @@ def login():
         db = DataBase()
         u = db.get_user_by_credentials(username, password)
         db.close()
-        if u == False: return redirect(url_for("views.login"))
+        # Tell the user if they entered the wrong login credentials
+        if u == False: 
+            flash("Incorrect Login Credentials", "failure")
+            return redirect(url_for("views.login"))
         # Add the user data to the session
         session["user"] = u
         session["room_code"] = room_code if room_code != "" else "GLOBAL"
+        flash("Successfully Logged In", "success")
         return redirect(url_for("views.home"))
     # Handle the user navigating to the login page
     else:
@@ -61,6 +66,7 @@ def logout():
     """
     session.pop("user", None)
     session.pop("room_code", None)
+    flash("Logged Out Successfully", "success")
     return redirect(url_for("views.login"))
 
 
@@ -104,7 +110,7 @@ def create_claim_code():
                 "username": recipient_username
             }
         )
-        # TODO: Make this flash a success message
+        flash("Successfully created claim code for " + recipient_username, "success")
         return redirect(url_for("views.home"))
     else:
         return render_template("claim.html", superuser=True)
@@ -122,16 +128,19 @@ def claim_account():
             if code_data["claim_code"] == code:
                 break
         else:
-            return render_template("claim.html") # TODO: Make this flash invalid claim code
+            flash("Invalid Claim Code", "failure")
+            return render_template("claim.html")
         # Check if the passwords match
-        if password != confirm_password: return render_template("claim.html") # TODO: Make this flash passwords do not match
+        if password != confirm_password: 
+            flash("Passwords Do Not Match", "failure")
+            return render_template("claim.html") # TODO: Make this flash passwords do not match
         # Create the account and add it to the database
         u = User(code_data["username"], password, 0)
         db = DataBase()
         db.add_user(u)
         db.close()
         claim_codes.remove(code_data) # Delete the claim code
-        # TODO: Make this flash a success message including the user's username
+        flash(f"Successfully claimed account for {u.username}", "success")
         return redirect(url_for("views.home"))
     else:
         # Prevent people from claiming an account if they are logged in

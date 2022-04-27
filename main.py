@@ -11,7 +11,7 @@ from application import create_app
 
 # Create the app and set the secret key
 app = create_app()
-app.config['SECRET_KEY'] = Config.SECRET_KEY
+app.secret_key = Config.SECRET_KEY
 
 # Configure the session
 app.config['SESSION_PERMANENT'] = False
