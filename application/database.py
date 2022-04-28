@@ -38,7 +38,7 @@ class DataBase:
         self.cursor.execute(query)
         self.conn.commit()
     
-    def perform_query(self, query):
+    def perform_query(self, query, args=[]):
         """Performs the specified query. When using this function, make sure that the input query
         is trusted as it is input directly into the database.
 
@@ -48,7 +48,7 @@ class DataBase:
         Returns:
             sqlite3.Cursor: The cursor object containing the result of the query
         """
-        res = self.cursor.execute(query)
+        res = self.cursor.execute(query, args)
         self.conn.commit()
         return res
     
