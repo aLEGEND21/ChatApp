@@ -153,9 +153,15 @@ function roomStatusToggleListener (statusDisplay) {
 // Add a room code to the list of public room codes on the screen
 function addPublicRoomCode (code) {
     let publicRoomsContainer = document.getElementById("public-rooms-container");
-    let roomCodeContainer = document.createElement("div");
+    // Check whether the room code is already displayed. If it is, then do not add another copy of it to the screen.
+    if (!(document.getElementById(`room-code-${code}`) == null)) {
+        return;
+    }
+    // Create the element containing the room code and set its attributes
+    let roomCodeContainer = document.createElement("a");
+    roomCodeContainer.setAttribute("href", `/?room_code=${code}`);
+    roomCodeContainer.setAttribute("class", "list-group-item list-group-item-action");
+    roomCodeContainer.setAttribute("id", `room-code-${code}`);
+    roomCodeContainer.innerText = code;
     publicRoomsContainer.append(roomCodeContainer);
-    roomCodeContainer.innerHTML = `<a href="/?room_code=${code}" class="list-group-item list-group-item-action" id="room-code-${code}">
-                                        ${code}
-                                   </a>`
 }
