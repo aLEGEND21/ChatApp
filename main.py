@@ -2,7 +2,6 @@ from flask_session import Session
 from flask_socketio import SocketIO
 from flask_socketio import emit
 from flask import session
-from numpy import broadcast
 
 from config import Config
 from application.database import DataBase
