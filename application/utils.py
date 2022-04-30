@@ -33,3 +33,4 @@ def is_superuser(func):
 
 # Variables
 claim_codes = [] # Contains all active claim codes in the application
+public_rooms = [] # Contains the room codes for all the public rooms in the application

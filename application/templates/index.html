@@ -6,22 +6,38 @@
 </head>
 <body>
     <style>
-        #message-container {
-            max-height: 67vh;
-            max-width: 50rem;
-            min-width: 25rem;
+        .text-box {
+            height: 67vh;
             overflow-y: scroll;
         }
-        #message-container::-webkit-scrollbar {
+        .text-box::-webkit-scrollbar {
             width: 0rem;
         }
+        #message-container {
+            max-width: 60rem;
+            min-width: 25rem;
+        }
     </style>
-    <p class="h4 text-center mt-4" id="room-code-display">Room Code: _</p>
-    <div class="mx-auto border mt-1 bg-light" id="message-container" style="min-height: 25rem">
-    </div>
-    <div class="text-center pt-3">
-        <p class="h6 text-center" id="username-display">Sending messages as _:</p>
-        <input class="text mb-1" id="send-box" style="min-width: 25rem" autocomplete="off">
+    <div class="row">
+        <!-- Show the public chat rooms list. This is hidden on devices with viewports smaller than medium. -->
+        <div class="col-3 d-none d-md-block">
+            <p class="h5 text-center mt-4">Public Rooms:</p>
+            <ul class="mx-auto border mt-1 bg-light text-box list-group text-center" id="public-rooms-container">
+                <a href="/?room_code=GLOBAL" class="list-group-item list-group-item-action">Global Chat</a>
+            </ul>
+            <p class="h6 text-center mt-1">Join a Room Here:</p>
+            <div class="form-inline">
+                <input class="pt-1 pb-1 mr-1 form-control" id="room-code-input" style="min-width: 100%;" autocomplete="off">
+            </div>
+        </div>
+        <!-- Show all messages. This takes up the entire screen on viewports smaller than medium, but shares the screen for larger viewports. -->
+        <div class="col-md-9 col-sm-12">
+            <p class="h5 text-center mt-4" id="room-code-display">Room Code: _</p>
+            <div class="mx-auto border mt-1 bg-light text-box" id="message-container">
+            </div>
+            <p class="h6 text-center mt-1" id="username-display">Sending messages as _:</p>
+            <input type="text" class="pt-1 pb-1 mb-1 form-control" id="message-send-box" style="min-width: 25rem" autocomplete="off">
+        </div>
     </div>
 </body>
 {% endblock content %}

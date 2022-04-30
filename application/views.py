@@ -46,7 +46,7 @@ def login():
         session["user"] = u
         session["room_code"] = room_code if room_code != "" else "GLOBAL"
         flash("Successfully Logged In", "success")
-        return redirect(url_for("views.home"))
+        return redirect(url_for("views.home", room_code=room_code))
     # Handle the user navigating to the login page
     else:
         # Only display the login page if the user is not logged in. Otherwise, redirect to the home page
@@ -80,6 +80,13 @@ def home():
     Returns:
         None: Displays the main/home page of the site if the user is logged in.
     """
+    # Get the room code from the request args and reformat it
+    room_code = request.args.get("room_code")
+    if room_code == None:
+        return redirect("/?room_code=GLOBAL")
+    elif room_code == "":
+        room_code = "GLOBAL"
+    session["room_code"] = room_code
     return render_template("index.html")
 
 @view.route("/users")

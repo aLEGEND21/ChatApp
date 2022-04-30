@@ -1,4 +1,3 @@
-// ---NEW---
 async function getUser () {
     return await fetch("/api/get_user")
         .then(async function (resp) {
@@ -48,27 +47,44 @@ var socket = io.connect(document.domain + ":" + location.port);
 var userData;
 var roomCode;
 
+// Create global roomStatus html object
+var roomStatus = document.createElement("button");
+roomStatus.setAttribute("class", "align-self-center btn badge badge-pill");
+roomStatus.setAttribute("style", "background-color: var(--blue-green)");
+roomStatus.setAttribute("onclick", "roomStatusToggleListener(this)");
+
 // Fetch username on connection and send "client connected" event to the server
 socket.on("connect", async function () {
     userData = await getUser();
     roomCode = await getRoomCode();
     document.getElementById("username-display").innerText = `Sending messages as ${userData.username}:`;
+    let roomCodeDisplay = document.getElementById("room-code-display");
     if (roomCode == "GLOBAL") {
-        document.getElementById("room-code-display").innerText = `Chatting in Global Chat`;
+        roomCodeDisplay.innerText = `Chatting in Global Chat `;
     } else {
-        document.getElementById("room-code-display").innerText = `Room Code: ${roomCode}`;
+        roomCodeDisplay.innerText = `Room Code: ${roomCode} `;
     }
+    roomCodeDisplay.appendChild(roomStatus);
     socket.emit("client connected");
 })
 
 // Load all messages to the screen after connecting
 socket.on("after connection", async function (data) {
-    let messages = data.data;
+    let messages = data.messages;
     messages.forEach(m => {
         if (m.room_code == roomCode) {
             addMessage(m);
         }
     });
+    // Update the public room display
+    let publicRoomCodes = data.public_rooms;
+    publicRoomCodes.forEach(c => addPublicRoomCode(c));
+    // Update the room status display 
+    if (publicRoomCodes.includes(roomCode) || roomCode == "GLOBAL") {
+        roomStatus.innerText = "Public";
+    } else {
+        roomStatus.innerText = "Private";
+    }
 })
 
 // Display new message onto the screen when the server sends the message data
@@ -78,18 +94,68 @@ socket.on("new message", async function (message) {
     }
 })
 
-// Send a message every time the user clicks the enter key
+socket.on("room status changed", async function (data) {
+    // Update the status button if the room being updated is the room the client is in
+    if (data.room_code == roomCode) {
+        roomStatus.innerText = data.action;
+    }
+    // Display the room code on the list of public room codes if the room was changed to public
+    if (data.action == "Public") {
+        addPublicRoomCode(data.room_code);
+    }
+    // Remove the room code from the list of public room codes if ti was changed to private
+    else if (data.action == "Private") {
+        document.getElementById(`room-code-${data.room_code}`).remove();
+    }
+})
+
+// Add a listener to perform an event every time the user presses the enter key
 document.addEventListener("keypress", function (event) {
     if (event.key == "Enter") {
-        sendBox = document.getElementById("send-box");
-        if (sendBox.value != "") {
+        msgSendBox = document.getElementById("message-send-box");
+        roomCodeInput = document.getElementById("room-code-input");
+
+        // Send a message if the user presses enter while the message send box is active
+        if (msgSendBox == document.activeElement && msgSendBox.value != "") {
             socket.emit("send message", {
-                "content": sendBox.value,
+                "content": msgSendBox.value,
                 "author_id": userData.user_id,
                 "author_username": userData.username,
                 "room_code": roomCode
             });
-            sendBox.value = "";
+            msgSendBox.value = "";
+        }
+        
+        // Navigate to a new room if the user presses enter while the room code input is active
+        else if (roomCodeInput == document.activeElement && roomCodeInput.value != "") {
+            this.location.href = "?room_code=" + roomCodeInput.value;
         }
     }
 });
+
+// Listen to the user clicking on the room status button and tell the server the updated status
+function roomStatusToggleListener (statusDisplay) {
+    if (userData.user_type == 1 && !(roomCode == "GLOBAL")) {
+        data = {
+            room_code: roomCode
+        }
+        // Update the data based on whether the room is being changed from public to private or vice versa
+        if (statusDisplay.innerText == "Public") {
+            data.action = "Private";
+        }
+        else if (statusDisplay.innerText == "Private") {
+            data.action = "Public";
+        }
+        socket.emit("room status update", data);
+    }
+}
+
+// Add a room code to the list of public room codes on the screen
+function addPublicRoomCode (code) {
+    let publicRoomsContainer = document.getElementById("public-rooms-container");
+    let roomCodeContainer = document.createElement("div");
+    publicRoomsContainer.append(roomCodeContainer);
+    roomCodeContainer.innerHTML = `<a href="/?room_code=${code}" class="list-group-item list-group-item-action" id="room-code-${code}">
+                                        ${code}
+                                   </a>`
+}

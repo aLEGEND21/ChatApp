@@ -2,11 +2,13 @@ from flask_session import Session
 from flask_socketio import SocketIO
 from flask_socketio import emit
 from flask import session
+from numpy import broadcast
 
 from config import Config
 from application.database import DataBase
 from application.message import Message
 from application import create_app
+from application.utils import public_rooms
 
 
 # Create the app and set the secret key
@@ -36,7 +38,7 @@ def on_connect():
     message_data = []
     for m in messages:
         message_data.append(m.to_dict())
-    emit('after connection', {'data': message_data})
+    emit('after connection', {'messages': message_data, 'public_rooms': public_rooms})
 
 @socketio.on('send message')
 def on_message_send(data, methods=["POST"]):
@@ -54,6 +56,21 @@ def on_message_send(data, methods=["POST"]):
     db.add_message(m)
     db.close()
     emit('new message', m.to_dict(), broadcast=True)
+
+@socketio.on('room status update')
+def on_room_status_update(data, methods=["POST"]):
+    """Handles socket connections related to when the status of a public room changes. This can
+    be when the room is changed from public to private or vice versa. 
+
+    Args:
+        data (_type_): The room status data containing the new room status.
+    """
+    data = dict(data)
+    if data["action"] == "Public" and data["room_code"] not in public_rooms:
+        public_rooms.append(data["room_code"])
+    elif data["action"] == "Private" and data["room_code"] in public_rooms:
+        public_rooms.remove(data["room_code"])
+    emit('room status changed', data, broadcast=True)
 
 
 # Mainline
