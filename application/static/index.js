@@ -22,7 +22,7 @@ function addMessage (m) {
     // Make the message border yellow if the user is being mentioned in it
     mentionCls = ""
     mentionStyle = "border: 4px solid transparent;"
-    if (m.content.includes("@" + m.author_username)) {
+    if (m.content.includes("@" + userData.username)) {
         mentionCls = "border-left";
         mentionStyle = "border-width: 4px !important; border-color: var(--blue-green) !important;";
     }
