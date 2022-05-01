@@ -19,9 +19,16 @@ function addMessage (m) {
     let messageContainer = document.getElementById("message-container");
     let messageDiv = document.createElement("div");
     messageContainer.appendChild(messageDiv);
+    // Make the message border yellow if the user is being mentioned in it
+    mentionCls = ""
+    mentionStyle = "border: 4px solid transparent;"
+    if (m.content.includes("@" + m.author_username)) {
+        mentionCls = "border-left";
+        mentionStyle = "border-width: 4px !important; border-color: var(--blue-green) !important;";
+    }
     // Change the color of the message depending on who sent it
     if (m.author_username == userData.username) {
-        var content =  `<div class="pt-4 pb-2 pl-5 pr-5 bg-grey">
+        var content =  `<div class="pt-4 pb-2 pl-5 pr-5 bg-grey ${mentionCls}" style="${mentionStyle}">
                             <div class="d-flex">
                                 <span class="h6"><strong>You</strong></span>
                                 <span class="h6 font-weight-light pl-3">${m.timestamp}</span>
@@ -29,7 +36,7 @@ function addMessage (m) {
                             <p class="text-secondary text-break">${m.content}</p>
                         </div>`;
     } else {
-        var content =  `<div class="pt-4 pb-2 pl-5 pr-5">
+        var content =  `<div class="pt-4 pb-2 pl-5 pr-5 ${mentionCls}" style="${mentionStyle}">
                             <div class="d-flex">
                                 <span class="h6">${m.author_username}</span>
                                 <span class="h6 font-weight-light pl-3">${m.timestamp}</span>
