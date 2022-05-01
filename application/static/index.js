@@ -28,15 +28,20 @@ function addMessage (m) {
     }
     // Change the color of the message depending on who sent it
     if (m.author_username == userData.username) {
-        var content =  `<div class="pt-4 pb-2 pl-5 pr-5 bg-grey ${mentionCls}" style="${mentionStyle}">
-                            <div class="d-flex">
+        var content =  `<div class="pt-4 pb-2 pl-5 pr-5 bg-grey ${mentionCls}" style="${mentionStyle}" id="msg-${m.msg_id}">
+                            <div class="d-inline-flex">
                                 <span class="h6"><strong>You</strong></span>
                                 <span class="h6 font-weight-light pl-3">${m.timestamp}</span>
+                            </div>
+                            <div class="d-inline float-right mt--1 mr--2" id="icons">
+                                <button type="button" class="btn btn-outline-danger btn-sm" style="padding: 2px 2px 1px 2px;" onclick="deleteButtonListener(this)">
+                                    <span class="material-symbols-outlined">delete</span>
+                                </button>
                             </div>
                             <p class="text-secondary text-break">${m.content}</p>
                         </div>`;
     } else {
-        var content =  `<div class="pt-4 pb-2 pl-5 pr-5 ${mentionCls}" style="${mentionStyle}">
+        var content =  `<div class="pt-4 pb-2 pl-5 pr-5 ${mentionCls}" style="${mentionStyle}" id="msg-${m.msg_id}">
                             <div class="d-flex">
                                 <span class="h6">${m.author_username}</span>
                                 <span class="h6 font-weight-light pl-3">${m.timestamp}</span>
@@ -46,6 +51,22 @@ function addMessage (m) {
     }
     messageDiv.innerHTML = content;
     messageDiv.scrollIntoView(); // Make sure the message is viewable
+}
+
+// Add a room code to the list of public room codes on the screen
+function addPublicRoomCode (code) {
+    let publicRoomsContainer = document.getElementById("public-rooms-container");
+    // Check whether the room code is already displayed. If it is, then do not add another copy of it to the screen.
+    if (!(document.getElementById(`room-code-${code}`) == null)) {
+        return;
+    }
+    // Create the element containing the room code and set its attributes
+    let roomCodeContainer = document.createElement("a");
+    roomCodeContainer.setAttribute("href", `/?room_code=${code}`);
+    roomCodeContainer.setAttribute("class", "list-group-item list-group-item-action");
+    roomCodeContainer.setAttribute("id", `room-code-${code}`);
+    roomCodeContainer.innerText = code;
+    publicRoomsContainer.append(roomCodeContainer);
 }
 
 
@@ -116,6 +137,17 @@ socket.on("room status changed", async function (data) {
     }
 })
 
+socket.on("message deleted", async function (data) {
+    // Edit the message to say that the message was deleted
+    msgContainer = document.getElementById(`msg-${data.msg_id}`);
+    try {
+        msgContainer.querySelector("#icons").remove(); // Remove all icons attached to the message
+    } catch (error) {
+    }
+    msgText = msgContainer.querySelector("p");
+    msgText.innerHTML = "<strong>Message Deleted</strong>";
+});
+
 // Add a listener to perform an event every time the user presses the enter key
 document.addEventListener("keypress", function (event) {
     if (event.key == "Enter") {
@@ -157,18 +189,13 @@ function roomStatusToggleListener (statusDisplay) {
     }
 }
 
-// Add a room code to the list of public room codes on the screen
-function addPublicRoomCode (code) {
-    let publicRoomsContainer = document.getElementById("public-rooms-container");
-    // Check whether the room code is already displayed. If it is, then do not add another copy of it to the screen.
-    if (!(document.getElementById(`room-code-${code}`) == null)) {
-        return;
-    }
-    // Create the element containing the room code and set its attributes
-    let roomCodeContainer = document.createElement("a");
-    roomCodeContainer.setAttribute("href", `/?room_code=${code}`);
-    roomCodeContainer.setAttribute("class", "list-group-item list-group-item-action");
-    roomCodeContainer.setAttribute("id", `room-code-${code}`);
-    roomCodeContainer.innerText = code;
-    publicRoomsContainer.append(roomCodeContainer);
+// Listen to when the delete button is clicked on a message and emit an "on message delete" event
+function deleteButtonListener (btn) {
+    // Retrive the msg id from the id of the parent of the parent of the button
+    let msgContainer = btn.parentElement.parentElement;
+    let msgId = msgContainer.getAttribute("id").split("-")[1];
+    // Emit the event to the server that the message was deleted
+    socket.emit("on message delete", {
+        msg_id: msgId
+    });
 }

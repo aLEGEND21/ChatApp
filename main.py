@@ -2,6 +2,7 @@ from flask_session import Session
 from flask_socketio import SocketIO
 from flask_socketio import emit
 from flask import session
+from numpy import broadcast
 
 from config import Config
 from application.database import DataBase
@@ -62,7 +63,7 @@ def on_room_status_update(data, methods=["POST"]):
     be when the room is changed from public to private or vice versa. 
 
     Args:
-        data (_type_): The room status data containing the new room status.
+        data (dict): The room status data containing the new room status.
     """
     data = dict(data)
     if data["action"] == "Public" and data["room_code"] not in public_rooms:
@@ -70,6 +71,20 @@ def on_room_status_update(data, methods=["POST"]):
     elif data["action"] == "Private" and data["room_code"] in public_rooms:
         public_rooms.remove(data["room_code"])
     emit('room status changed', data, broadcast=True)
+
+@socketio.on('on message delete')
+def on_message_delete(data, methods=["POST"]):
+    """Handles socket connections to delete messages from the database. This route then broadcasts
+    a message deleted event to all connected clients, who then handle the deletion of the message 
+    from the screens of their users.
+
+    Args:
+        data (dict): Data containing the msg_id of the message to be deleted.
+    """
+    data = dict(data)
+    db = DataBase()
+    db.delete_message(data["msg_id"])
+    emit("message deleted", data, broadcast=True)
 
 
 # Mainline

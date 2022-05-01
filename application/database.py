@@ -195,3 +195,13 @@ class DataBase:
         query = """DELETE FROM Messages"""
         self.cursor.execute(query)
         self.conn.commit()
+    
+    def delete_message(self, msg_id: int):
+        """Deletes the specified message from the Messages table.
+
+        Args:
+            msg_id (int): The unique id of the message to be deleted
+        """
+        query = """DELETE FROM Messages WHERE msg_id = ?"""
+        self.cursor.execute(query, (msg_id,))
+        self.conn.commit()
