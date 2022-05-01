@@ -140,14 +140,14 @@ def claim_account():
         # Check if the passwords match
         if password != confirm_password: 
             flash("Passwords Do Not Match", "failure")
-            return render_template("claim.html") # TODO: Make this flash passwords do not match
+            return render_template("claim.html")
         # Create the account and add it to the database
         u = User(code_data["username"], password, 0)
         db = DataBase()
         db.add_user(u)
         db.close()
         claim_codes.remove(code_data) # Delete the claim code
-        flash(f"Successfully claimed account for {u.username}", "success")
+        flash(f"Successfully claimed account for {u.username}. Please log in using {u.username} as your username", "success")
         return redirect(url_for("views.home"))
     else:
         # Prevent people from claiming an account if they are logged in
