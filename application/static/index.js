@@ -26,6 +26,13 @@ function addMessage (m) {
         mentionCls = "border-left";
         mentionStyle = "border-width: 4px !important; border-color: var(--blue-green) !important;";
     }
+    // Display a delete button for message authors and superusers
+    deleteButton = ""
+    if (userData.username == m.author_username || userData.user_type == 1) {
+        deleteButton = `<button type="button" class="btn btn-outline-danger btn-sm" style="padding: 2px 2px 1px 2px;" onclick="deleteButtonListener(this)">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>`
+    }
     // Change the color of the message depending on who sent it
     if (m.author_username == userData.username) {
         var content =  `<div class="pt-4 pb-2 pl-5 pr-5 bg-grey ${mentionCls}" style="${mentionStyle}" id="msg-${m.msg_id}">
@@ -34,17 +41,18 @@ function addMessage (m) {
                                 <span class="h6 font-weight-light pl-3">${m.timestamp}</span>
                             </div>
                             <div class="d-inline float-right mt--1 mr--2" id="icons">
-                                <button type="button" class="btn btn-outline-danger btn-sm" style="padding: 2px 2px 1px 2px;" onclick="deleteButtonListener(this)">
-                                    <span class="material-symbols-outlined">delete</span>
-                                </button>
+                                ${deleteButton}
                             </div>
                             <p class="text-secondary text-break">${m.content}</p>
                         </div>`;
     } else {
         var content =  `<div class="pt-4 pb-2 pl-5 pr-5 ${mentionCls}" style="${mentionStyle}" id="msg-${m.msg_id}">
-                            <div class="d-flex">
+                            <div class="d-inline-flex">
                                 <span class="h6">${m.author_username}</span>
                                 <span class="h6 font-weight-light pl-3">${m.timestamp}</span>
+                            </div>
+                            <div class="d-inline float-right mt--1 mr--2" id="icons">
+                                ${deleteButton}
                             </div>
                             <p class="text-secondary text-break">${m.content}</p>
                         </div>`;
