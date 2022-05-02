@@ -12,8 +12,8 @@
             <tr>
                 <th scope="col">Username</th>
                 <th scope="col">Password</th>
-                <th scope="col">User ID</th>
                 <th scope="col">User Type</th>
+                <th scope="col" class="d-none d-md-block">User ID</th>
             </tr>
         </thead>
         <tbody>
@@ -21,12 +21,12 @@
                 <tr>
                     <td>{{ user.username }}</td>
                     <td>{{ user.password }}</td>
-                    <td>{{ user.user_id }}</td>
                     {% if user.user_type == 0 %}
                         <td>Normal</td>
                     {% elif user.user_type == 1 %}
                         <td>Superuser</td>
                     {% endif %}
+                    <td class="d-none d-md-block">{{ user.user_id }}</td>
                 </tr>
             {% endfor %}
         </tbody>
