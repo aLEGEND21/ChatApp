@@ -1,6 +1,6 @@
-from profanity_filter import ProfanityFilter
 from flask_session import Session
 from flask_socketio import SocketIO
+from profanity import censor_profanity
 from flask_socketio import emit
 from flask import session
 
@@ -51,6 +51,7 @@ def on_message_send(data, methods=["POST"]):
         data (dict): The message data that is generated when a user sends a message.
     """
     data = dict(data)
+    data["content"] = censor_profanity(data["content"]) # Filter out any profanity from the message content
     m = Message(data["content"], data["author_id"], data["author_username"], data["room_code"])
     db = DataBase()
     db.add_message(m)
@@ -84,6 +85,7 @@ def on_message_delete(data, methods=["POST"]):
     data = dict(data)
     db = DataBase()
     db.delete_message(data["msg_id"])
+    db.close()
     emit("message deleted", data, broadcast=True)
 
 
