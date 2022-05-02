@@ -3,6 +3,7 @@ from flask import flash
 from flask import redirect
 from flask import render_template
 from flask import url_for
+from emoji.unicode_codes.data_dict import EMOJI_DATA
 from flask import request
 from flask import session
 
@@ -155,3 +156,23 @@ def claim_account():
             return redirect(url_for("views.home"))
         else:
             return render_template("claim.html")
+
+@view.route("/emojis")
+def emoji_list():
+    # Extract the emoji, emoji name, and aliases
+    emojis = []
+    for e_key in EMOJI_DATA:
+        e = {}
+        e['name'] = EMOJI_DATA[e_key]['en']
+        e['emoji'] = e_key
+        e['alias'] = EMOJI_DATA[e_key].get('alias')
+        # Do not add emojis with long names to the emoji list
+        if len(e['name']) > 20:
+            continue
+        # Remove extremely long aliases form the emoji list
+        if e["alias"] is not None:
+            for alias in EMOJI_DATA[e_key]['alias']:
+                if len(alias) > 20:
+                    e['alias'].remove(alias)
+        emojis.append(e)
+    return render_template("emojis.html", emojis=emojis)
