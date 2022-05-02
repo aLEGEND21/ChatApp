@@ -21,7 +21,7 @@ function addMessage (m) {
     messageContainer.appendChild(messageDiv);
     // Make the message border yellow if the user is being mentioned in it
     mentionCls = ""
-    mentionStyle = "border: 4px solid transparent;"
+    mentionStyle = "border-width: 4px !important; border-color: transparent !important;"
     if (m.content.includes("@" + userData.username)) {
         mentionCls = "border-left";
         mentionStyle = "border-width: 4px !important; border-color: var(--blue-green) !important;";
