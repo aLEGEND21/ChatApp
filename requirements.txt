@@ -1,5 +1,6 @@
-Flask>=2.0.2
-Flask_SocketIO>=5.1.1
-Flask_Session>=0.4.0
-python-dotenv>=0.20.0
-pytz>=2022.1
+Flask==2.0.2
+Flask_SocketIO==5.1.1
+Flask_Session==0.4.0
+profanity-filter2==1.4.3
+python-dotenv==0.20.0
+pytz==2022.1

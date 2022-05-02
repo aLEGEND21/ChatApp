@@ -1,3 +1,4 @@
+from profanity_filter import ProfanityFilter
 from flask_session import Session
 from flask_socketio import SocketIO
 from flask_socketio import emit
