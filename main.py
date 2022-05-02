@@ -8,6 +8,7 @@ from config import Config
 from application.database import DataBase
 from application.message import Message
 from application import create_app
+from application.utils import get_all_emojis
 from application.utils import public_rooms
 
 
@@ -52,6 +53,11 @@ def on_message_send(data, methods=["POST"]):
     """
     data = dict(data)
     data["content"] = censor_profanity(data["content"]) # Filter out any profanity from the message content
+    # Replace all emoji names with the actual emoji in the message content
+    emoji_data = get_all_emojis()
+    for emoji_name in emoji_data:
+        data["content"] = data["content"].replace(f":{emoji_name}:", emoji_data[emoji_name])
+    # Construct the message object and add it to the database. Then, send the message to all clients
     m = Message(data["content"], data["author_id"], data["author_username"], data["room_code"])
     db = DataBase()
     db.add_message(m)

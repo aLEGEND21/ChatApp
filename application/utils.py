@@ -1,8 +1,11 @@
 import functools
+import json
 from flask import redirect
 from flask import url_for
 from flask import session
 
+
+# DECORATORS
 
 def logged_in(func):
     """Checks whether the user is logged in to the application by checking if there is a valid
@@ -31,6 +34,22 @@ def is_superuser(func):
     return wrapper
 
 
-# Variables
+# FUNCTIONS
+
+def get_all_emojis():
+    """Gets all emojis from the JSON file containing the emojis and returns them. The emojis are
+    formatted as {emoji_name: emoji}.
+
+    Returns:
+        dict: A dict of all emojis with the emoji name as the key and the emoji as the value.
+    """
+    with open("./emojis.json", 'rb') as f:
+        emojis = json.load(f)
+    return emojis
+
+
+
+# VARIABLES
+
 claim_codes = [] # Contains all active claim codes in the application
 public_rooms = [] # Contains the room codes for all the public rooms in the application
