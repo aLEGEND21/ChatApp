@@ -3,6 +3,7 @@ from flask_socketio import SocketIO
 from profanity import censor_profanity
 from flask_socketio import emit
 from emoji import emojize
+from flask import escape
 from flask import session
 
 from config import Config
@@ -58,6 +59,9 @@ def on_message_send(data, methods=["POST"]):
     for emoji_name in emoji_data:
         data["content"] = data["content"].replace(f":{emoji_name}:", emoji_data[emoji_name])"""
     data["content"] = emojize(data["content"])
+    # Escape any html in the message if the user is not a superuser
+    if session.get("user").user_type != 1:
+        data["content"] = escape(data["content"])
     # Construct the message object and add it to the database. Then, send the message to all clients
     m = Message(data["content"], data["author_id"], data["author_username"], data["room_code"])
     db = DataBase()
