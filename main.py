@@ -3,7 +3,6 @@ from flask_socketio import SocketIO
 from profanity import censor_profanity
 from flask_socketio import emit
 from flask import escape
-from flask import flash
 from time import time
 from flask import session
 
