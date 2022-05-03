@@ -55,3 +55,4 @@ def get_all_emojis():
 
 claim_codes = [] # Contains all active claim codes in the application
 public_rooms = [] # Contains the room codes for all the public rooms in the application
+ratelimits = {} # Contains the user ID and when the last message was sent

@@ -3,6 +3,8 @@ from flask_socketio import SocketIO
 from profanity import censor_profanity
 from flask_socketio import emit
 from flask import escape
+from flask import flash
+from time import time
 from flask import session
 
 from config import Config
@@ -11,6 +13,7 @@ from application.message import Message
 from application import create_app
 from application.utils import get_all_emojis
 from application.utils import public_rooms
+from application.utils import ratelimits
 
 
 # Create the app and set the secret key
@@ -53,6 +56,13 @@ def on_message_send(data, methods=["POST"]):
         data (dict): The message data that is generated when a user sends a message.
     """
     data = dict(data)
+    # Ratelimit the user if they send messages too fast and are not a superuser
+    current_time = time()
+    if session.get("user").user_type != 1:
+        if ratelimits.get(data["author_id"]) is not None:
+            if current_time - ratelimits[data["author_id"]] < 0.25:
+                return
+        ratelimits[data["author_id"]] = current_time # Update the time when the last message was sent
     data["content"] = censor_profanity(data["content"]) # Filter out any profanity from the message content
     # Replace all emoji names with the actual emoji in the message content. This is done by slicing 
     # the message content on the colon character and then trying to get each message fragment from
