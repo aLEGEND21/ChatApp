@@ -2,7 +2,6 @@ from flask_session import Session
 from flask_socketio import SocketIO
 from profanity import censor_profanity
 from flask_socketio import emit
-from emoji import emojize
 from flask import escape
 from flask import session
 

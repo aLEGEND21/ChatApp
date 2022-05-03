@@ -3,7 +3,6 @@ from flask import flash
 from flask import redirect
 from flask import render_template
 from flask import url_for
-from emoji.unicode_codes.data_dict import EMOJI_DATA
 from flask import request
 from flask import session
 
