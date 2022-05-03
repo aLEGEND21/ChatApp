@@ -9,6 +9,7 @@ from flask import session
 
 from application.database import DataBase
 from application.user import User
+from application.utils import get_all_emojis
 from application.utils import is_superuser
 from application.utils import logged_in
 from application.utils import claim_codes
@@ -159,8 +160,8 @@ def claim_account():
 
 @view.route("/emojis")
 def emoji_list():
-    # Extract the emoji, emoji name, and aliases
-    emojis = []
+    # Extract the emoji, emoji name, and aliases # OLD
+    """emojis = []
     for e_key in EMOJI_DATA:
         e = {}
         e['name'] = EMOJI_DATA[e_key]['en']
@@ -174,5 +175,19 @@ def emoji_list():
             for alias in EMOJI_DATA[e_key]['alias']:
                 if len(alias) > 20:
                     e['alias'].remove(alias)
-        emojis.append(e)
+        emojis.append(e)"""
+    emojis = []
+    emoji_data = get_all_emojis()
+    for emoji_name in emoji_data:
+        # Skip emojis with names that are too long
+        if len(emoji_name) > 20:
+            continue
+        # Add the emoji's data to the emojis list
+        emojis.append(
+            {
+                "name": emoji_name,
+                "emoji": emoji_data[emoji_name]
+            }
+        )
+    emojis.sort(key=lambda e: e["name"])
     return render_template("emojis.html", emojis=emojis)

@@ -15,12 +15,7 @@
                 <tr>
                     <td>
                         <code>
-                            {{ emoji.name }}
-                            {% if emoji.alias != none%}
-                                {% for alias in emoji.alias %}
-                                   <br> {{ alias }}
-                                {% endfor %}
-                            {% endif %}
+                            :{{ emoji.name }}:
                         </code>
                     </td>
                     <td>
@@ -28,18 +23,6 @@
                     </td>
                 </tr>
             {% endfor %}
-            <!--{% for user in users %}
-                <tr>
-                    <td>{{ user.username }}</td>
-                    <td>{{ user.password }}</td>
-                    {% if user.user_type == 0 %}
-                        <td>Normal</td>
-                    {% elif user.user_type == 1 %}
-                        <td>Superuser</td>
-                    {% endif %}
-                    <td class="d-none d-md-block">{{ user.user_id }}</td>
-                </tr>
-            {% endfor %}-->
         </tbody>
     </table>
 </body>

@@ -10,6 +10,7 @@ from config import Config
 from application.database import DataBase
 from application.message import Message
 from application import create_app
+from application.utils import get_all_emojis
 from application.utils import public_rooms
 
 
@@ -54,11 +55,16 @@ def on_message_send(data, methods=["POST"]):
     """
     data = dict(data)
     data["content"] = censor_profanity(data["content"]) # Filter out any profanity from the message content
-    # Replace all emoji names with the actual emoji in the message content
-    """emoji_data = get_all_emojis()
-    for emoji_name in emoji_data:
-        data["content"] = data["content"].replace(f":{emoji_name}:", emoji_data[emoji_name])"""
-    data["content"] = emojize(data["content"])
+    # Replace all emoji names with the actual emoji in the message content. This is done by slicing 
+    # the message content on the colon character and then trying to get each message fragment from
+    # the dict containing all the emojis. This is fast because of Big O time complexity
+    emoji_data = get_all_emojis()
+    m_content = data["content"].split(":")
+    for emoji_name in m_content:
+        emoji = emoji_data.get(emoji_name)
+        if emoji is not None:
+            data["content"] = data["content"].replace(f":{emoji_name}:", emoji)
+    #data["content"] = emojize(data["content"]) # OLD
     # Escape any html in the message if the user is not a superuser
     if session.get("user").user_type != 1:
         data["content"] = escape(data["content"])

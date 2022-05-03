@@ -43,6 +43,8 @@ def get_all_emojis():
     Returns:
         dict: A dict of all emojis with the emoji name as the key and the emoji as the value.
     """
+    # Note: Similar emojis have been removed from the json file such as emojis with different skin tones
+    # Note: The emoji file was sourced from: https://github.com/ArkinSolomon/discord-emoji-converter/blob/master/emojis.json
     with open("./emojis.json", 'rb') as f:
         emojis = json.load(f)
     return emojis
