@@ -58,7 +58,16 @@ function addMessage (m) {
                         </div>`;
     }
     messageDiv.innerHTML = content;
-    messageDiv.scrollIntoView(); // Make sure the message is viewable
+    // Scroll down to the lowest message unless the user is trying to scroll up
+    console.log((messageContainer.scrollHeight - messageContainer.scrollTop) / messageContainer.scrollHeight);
+    let scrollProportion = (messageContainer.scrollHeight - messageContainer.scrollTop) / messageContainer.scrollHeight
+    if (scrollProportion < 0.09) {
+        messageDiv.scrollIntoView(); // Make sure the message is viewable
+    }
+    // TODO: ^ Make this display the number of messages unread while a user is reading other messages
+    // This should be done by using a global var and then showing/hiding a floating element while updating it with the number of missed messages
+    // Toggle whether the unread-messages should be seen: https://stackoverflow.com/questions/18568736/how-to-hide-element-using-twitter-bootstrap-and-show-it-using-jquery
+    // Update the number of unread messages every time a message is sent
 }
 
 // Add a room code to the list of public room codes on the screen
@@ -106,12 +115,15 @@ socket.on("connect", async function () {
 
 // Load all messages to the screen after connecting
 socket.on("after connection", async function (data) {
+    // Add all the messages to the screen and scroll to the bottom
     let messages = data.messages;
     messages.forEach(m => {
         if (m.room_code == roomCode) {
             addMessage(m);
         }
     });
+    let messageContainer = document.getElementById("message-container");
+    messageContainer.scrollTop = messageContainer.scrollHeight; // Needed because auto-scroll doesn't work when loading messages
     // Update the public room display
     let publicRoomCodes = data.public_rooms;
     publicRoomCodes.forEach(c => addPublicRoomCode(c));
