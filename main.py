@@ -69,7 +69,7 @@ def on_message_send(data, methods=["POST"]):
     emoji_data = get_all_emojis()
     m_content = data["content"].split(":")
     for emoji_name in m_content:
-        emoji = emoji_data.get(emoji_name)
+        emoji = emoji_data.get(emoji_name.lower())
         if emoji is not None:
             data["content"] = data["content"].replace(f":{emoji_name}:", emoji)
     #data["content"] = emojize(data["content"]) # OLD
