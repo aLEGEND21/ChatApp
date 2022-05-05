@@ -59,8 +59,9 @@ function addMessage (m) {
     }
     messageDiv.innerHTML = content;
     // Scroll down to the lowest message unless the user is trying to scroll up
-    let scrollPercent = (messageContainer.scrollTop / (messageContainer.scrollHeight - messageContainer.clientHeight)) * 100;
-    if (scrollPercent > 87.5) {
+    //let scrollPercent = (messageContainer.scrollTop / (messageContainer.scrollHeight - messageContainer.clientHeight)) * 100;
+    let scrollPercent = (messageContainer.scrollTop + messageContainer.clientHeight) / messageContainer.scrollHeight * 100;
+    if (scrollPercent > 93.5) {
         messageDiv.scrollIntoView(); // Make sure the message is viewable
     }
     console.log(scrollPercent);
