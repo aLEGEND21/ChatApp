@@ -58,13 +58,14 @@ function addMessage (m) {
                         </div>`;
     }
     messageDiv.innerHTML = content;
+    messageDiv.scrollIntoView();
     // Scroll down to the lowest message unless the user is trying to scroll up
     //let scrollPercent = (messageContainer.scrollTop / (messageContainer.scrollHeight - messageContainer.clientHeight)) * 100;
-    let scrollPercent = (messageContainer.scrollTop + messageContainer.clientHeight) / messageContainer.scrollHeight * 100;
-    if (scrollPercent > 93.5) {
+    /*let scrollPercent = (messageContainer.scrollTop + messageContainer.clientHeight) / messageContainer.scrollHeight * 100;
+    if (scrollPercent > 90) {
         messageDiv.scrollIntoView(); // Make sure the message is viewable
     }
-    console.log(scrollPercent);
+    console.log(scrollPercent);*/
     // TODO: ^ Make this display the number of messages unread while a user is reading other messages
     // This should be done by using a global var and then showing/hiding a floating element while updating it with the number of missed messages
     // Toggle whether the unread-messages should be seen: https://stackoverflow.com/questions/18568736/how-to-hide-element-using-twitter-bootstrap-and-show-it-using-jquery
