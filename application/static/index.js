@@ -15,7 +15,7 @@ async function getRoomCode () {
         });
 }
 
-function addMessage (m) {
+function addMessage (m, loadingMessages) {
     let messageContainer = document.getElementById("message-container");
     let messageDiv = document.createElement("div");
     messageContainer.appendChild(messageDiv);
@@ -58,6 +58,16 @@ function addMessage (m) {
                         </div>`;
     }
     messageDiv.innerHTML = content;
+    // Display a notification to the user if they are not on the site when a message is sent
+    if (document.hidden && loadingMessages == false) {
+        if (Notification.permission != 'granted') {
+            Notification.requestPermission();
+        } else {
+            var notification = new Notification(`New Message From ${m.author_username}`, {
+                body: m.content
+            });
+        }
+    }
     messageDiv.scrollIntoView();
     // Scroll down to the lowest message unless the user is trying to scroll up
     //let scrollPercent = (messageContainer.scrollTop / (messageContainer.scrollHeight - messageContainer.clientHeight)) * 100;
@@ -72,6 +82,7 @@ function addMessage (m) {
     // Update the number of unread messages every time a message is sent
     // Figure out why the thing that shows unread messages prevents scrolling
     // Figure out why the proportion is different on the live site
+    // Percentages are different when site is reloaded
 }
 
 // Add a room code to the list of public room codes on the screen
@@ -123,7 +134,7 @@ socket.on("after connection", async function (data) {
     let messages = data.messages;
     messages.forEach(m => {
         if (m.room_code == roomCode) {
-            addMessage(m);
+            addMessage(m, true);
         }
     });
     let messageContainer = document.getElementById("message-container");
@@ -142,7 +153,7 @@ socket.on("after connection", async function (data) {
 // Display new message onto the screen when the server sends the message data
 socket.on("new message", async function (message) {
     if (message.room_code == roomCode) {
-        addMessage(message);
+        addMessage(message, false);
     }
 })
 
