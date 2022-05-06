@@ -29,7 +29,7 @@ function addMessage (m, loadingMessages) {
     // Display a delete button for message authors and superusers
     deleteButton = ""
     if (userData.username == m.author_username || userData.user_type == 1) {
-        deleteButton = `<button type="button" class="btn btn-outline-danger btn-sm" style="padding: 2px 2px 1px 2px;" onclick="deleteButtonListener(this)">
+        deleteButton = `<button type="button" class="btn btn-outline-danger btn-sm" style="padding: 1px 1px 0px 1px;" onclick="deleteButtonListener(this)">
                             <span class="material-symbols-outlined">delete</span>
                         </button>`
     }
