@@ -59,14 +59,17 @@ function addMessage (m, loadingMessages) {
     }
     messageDiv.innerHTML = content;
     // Display a notification to the user if they are not on the site when a message is sent
-    if (document.hidden && loadingMessages == false) {
+    if (document.hidden && loadingMessages == false && notified == false) {
         if (Notification.permission != 'granted') {
             Notification.requestPermission();
         } else {
             var notification = new Notification(`New Message From ${m.author_username}`, {
                 body: m.content
             });
+            notified = true;
         }
+    } else if (!(document.hidden)) {
+        notified = false; // Reset notified back to false
     }
     messageDiv.scrollIntoView();
     // Scroll down to the lowest message unless the user is trying to scroll up
@@ -106,6 +109,7 @@ function addPublicRoomCode (code) {
 var socket = io.connect(document.domain + ":" + location.port);
 var userData;
 var roomCode;
+var notified = false; // Shows whether the user has been already been notified about a new message
 
 // Create global roomStatus html object
 var roomStatus = document.createElement("button");
