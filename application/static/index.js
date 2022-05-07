@@ -26,12 +26,17 @@ function addMessage (m, loadingMessages) {
         mentionCls = "border-left";
         mentionStyle = "border-width: 4px !important; border-color: var(--blue-green) !important;";
     }
-    // Display a delete button for message authors and superusers
-    deleteButton = ""
+    // Display the buttons for message authors and superusers
+    buttons = ""
     if (userData.username == m.author_username || userData.user_type == 1) {
-        deleteButton = `<button type="button" class="btn btn-outline-danger btn-sm" style="padding: 1px 1px 0px 1px;" onclick="deleteButtonListener(this)">
-                            <span class="material-symbols-outlined">delete</span>
-                        </button>`
+        buttons = `
+                    <button type="button" class="btn btn-outline-secondary btn-sm" style="padding: 1px 1px 0px 1px;" onclick="editButtonListener(this)">
+                        <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" style="padding: 1px 1px 0px 1px;" onclick="deleteButtonListener(this)">
+                        <span class="material-symbols-outlined">delete</span>
+                    </button>
+        `
     }
     // Change the color of the message depending on who sent it
     if (m.author_username == userData.username) {
@@ -41,20 +46,20 @@ function addMessage (m, loadingMessages) {
                                 <span class="h6 font-weight-light pl-3">${m.timestamp}</span>
                             </div>
                             <div class="d-inline float-right mt--1 mr--2" id="icons">
-                                ${deleteButton}
+                                ${buttons}
                             </div>
-                            <p class="text-secondary text-break">${m.content}</p>
+                            <p class="text-secondary text-break" id="content">${m.content}</p>
                         </div>`;
     } else {
         var content =  `<div class="pt-4 pb-2 pl-5 pr-5 ${mentionCls}" style="${mentionStyle}" id="msg-${m.msg_id}">
-                            <div class="d-inline-flex">
+                            <div class="d-inline-flex pr-1">
                                 <span class="h6">${m.author_username}</span>
                                 <span class="h6 font-weight-light pl-3">${m.timestamp}</span>
                             </div>
                             <div class="d-inline float-right mt--1 mr--2" id="icons">
-                                ${deleteButton}
+                                ${buttons}
                             </div>
-                            <p class="text-secondary text-break">${m.content}</p>
+                            <p class="text-secondary text-break" id="content">${m.content}</p>
                         </div>`;
     }
     messageDiv.innerHTML = content;
@@ -102,6 +107,32 @@ function addPublicRoomCode (code) {
     roomCodeContainer.setAttribute("id", `room-code-${code}`);
     roomCodeContainer.innerText = code;
     publicRoomsContainer.append(roomCodeContainer);
+}
+
+// Handles the sending of the socket event when the nsg edit is confirmed
+function editConfirmed (msgContainer) {
+    // Get all the data related to the message being edited
+    let msgEditInput = msgContainer.querySelector("#edit-msg-input");
+    let msgId = msgContainer.getAttribute("id").split("-")[1];
+    let oldContent = msgContainer.children["content"].innerText;
+    let newContent = msgEditInput.value;
+    // Remove the message editing UI and show the hidden old content
+    msgEditInput.remove();
+    $(msgContainer.children["content"]).removeClass("d-none");
+    /*let msgContent = document.createElement("p"); // TODO See why this doesn't show the edit
+    $(msgContent).attr({
+        class: "text-secondary text-break",
+        id: "content"
+    });
+    $(msgContent).val(newContent);
+    console.log(newContent);
+    msgContainer.appendChild(msgContent);*/
+    // Emit the socket event
+    socket.emit("on message edit", {
+        msg_id: msgId,
+        old_content: oldContent,
+        new_content: newContent
+    });
 }
 
 
@@ -179,13 +210,27 @@ socket.on("room status changed", async function (data) {
 socket.on("message deleted", async function (data) {
     // Edit the message to say that the message was deleted
     msgContainer = document.getElementById(`msg-${data.msg_id}`);
+    // Remove all icons attached to the message
     try {
-        msgContainer.querySelector("#icons").remove(); // Remove all icons attached to the message
+        msgContainer.querySelector("#icons").remove();
+    } catch (error) {
+    }
+    // If the user is in the edit message UI, remove the edit UI and make the message content visible again
+    try {
+        msgContainer.querySelector("#edit-msg-input").remove();
+        $(msgContainer.querySelector("#content")).removeClass("d-none");
     } catch (error) {
     }
     msgText = msgContainer.querySelector("p");
     msgText.innerHTML = "<strong>Message Deleted</strong>";
 });
+
+socket.on("message edited", async function (data) {
+    // Edit the existing msgContent element to have the new message content
+    msgContainer = document.getElementById(`msg-${data.msg_id}`);
+    msgContent = msgContainer.children["content"];
+    msgContent.innerHTML = data.new_content;
+})
 
 // Add a listener to perform an event every time the user presses the enter key
 document.addEventListener("keypress", function (event) {
@@ -208,6 +253,11 @@ document.addEventListener("keypress", function (event) {
         else if (roomCodeInput == document.activeElement && roomCodeInput.value != "") {
             this.location.href = "?room_code=" + roomCodeInput.value;
         }
+
+        // Run the edit confimed function if enter is clicked with a message edit box active
+        else if (document.activeElement.getAttribute("id") == "edit-msg-input") {
+            editConfirmed(document.activeElement.parentElement);
+        }
     }
 });
 
@@ -226,6 +276,41 @@ function roomStatusToggleListener (statusDisplay) {
         }
         socket.emit("room status update", data);
     }
+}
+
+// Listen to when the edit button is clicked on a message and edit the UI so that the user can edit the message
+function editButtonListener (btn) {
+    /*let msgContainer = btn.parentElement.parentElement;
+    let msgId = msgContainer.getAttribute("id").split("-")[1];
+    let oldContent = msgContainer.children["content"].innerText;*/
+    // TODO: ^ Move this to an enter button listener where this data is retrieved when the user confirms the edit
+    // Hide the message content
+    let msgContainer = btn.parentElement.parentElement;
+    // Do not allow the user to edit the message if the edit UI is already being displayed
+    if (msgContainer.children["edit-msg-input"] != undefined) {
+        return;
+    }
+    $(msgContainer.children["content"]).addClass("d-none");
+    // Add an input element to the message body which the user can type in
+    editInput = document.createElement("input");
+    $(editInput).attr({
+        type: "text",
+        class: "form-control",
+        id: "edit-msg-input",
+        autocomplete: "off",
+        style: "background-color: rgba(240,240,240,10); width: 95%;"
+    });
+    $(editInput).val(msgContainer.children["content"].innerText.replace(" (edited)", "")); // Remove "(edited)" message from string
+    msgContainer.appendChild(editInput);
+    editInput.focus();
+    // Add an edit confimed button
+    /*editConfirmButton = document.createElement("button");
+    $(editConfirmButton).attr({
+        class: "btn bg-blue-green",
+        onclick: "editConfirmed(this.parentElement)",
+    });
+    editConfirmButton.innerText = "Edit";
+    msgContainer.appendChild(editConfirmButton);*/
 }
 
 // Listen to when the delete button is clicked on a message and emit an "on message delete" event

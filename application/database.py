@@ -205,3 +205,14 @@ class DataBase:
         query = """DELETE FROM Messages WHERE msg_id = ?"""
         self.cursor.execute(query, (msg_id,))
         self.conn.commit()
+    
+    def edit_message(self, msg_id: int, new_content: str):
+        """Edits the specified message from the Messages table.
+        
+        Args:
+            msg_id (int): The unique id of the message to be edited
+            new_content (str): The new content of the message which will replace the existing content
+        """
+        query = """UPDATE Messages SET content = ? WHERE msg_id = ?"""
+        self.cursor.execute(query, (new_content, msg_id))
+        self.conn.commit()

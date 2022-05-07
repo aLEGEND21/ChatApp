@@ -1,8 +1,8 @@
+from flask import Markup
 from flask_session import Session
 from flask_socketio import SocketIO
 from profanity import censor_profanity
 from flask_socketio import emit
-from flask import escape
 from time import time
 from flask import session
 
@@ -75,7 +75,7 @@ def on_message_send(data, methods=["POST"]):
     #data["content"] = emojize(data["content"]) # OLD
     # Escape any html in the message if the user is not a superuser
     if session.get("user").user_type != 1:
-        data["content"] = escape(data["content"])
+        data["content"] = Markup.escape(data["content"])
     # Construct the message object and add it to the database. Then, send the message to all clients
     m = Message(data["content"], data["author_id"], data["author_username"], data["room_code"])
     db = DataBase()
@@ -97,6 +97,25 @@ def on_room_status_update(data, methods=["POST"]):
     elif data["action"] == "Private" and data["room_code"] in public_rooms:
         public_rooms.remove(data["room_code"])
     emit('room status changed', data, broadcast=True)
+
+@socketio.on('on message edit')
+def on_message_edit(data, methods=["POST"]):
+    """Handles socket connections to edit messages in the database. After editing the message,
+    this socket route then broadcasts the edited message to all clients who handle the editing
+    of the message to the screens of their users.
+
+    Args:
+        data (dict): JSON containing the msg_id and the new_content of the message to be edited
+        methods (list, optional): _description_. Defaults to ["POST"].
+    """
+    data = dict(data)
+    # Escape any html in the message if the user is not a superuser
+    if session.get("user").user_type != 1:
+        data["new_content"] = Markup.escape(data["new_content"]) + Markup(' <small class="font-italic">(edited)</small>')
+    db = DataBase()
+    db.edit_message(data["msg_id"], data["new_content"])
+    db.close()
+    emit("message edited", data, broadcast=True)
 
 @socketio.on('on message delete')
 def on_message_delete(data, methods=["POST"]):
