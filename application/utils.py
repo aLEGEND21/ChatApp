@@ -1,5 +1,7 @@
 import functools
 import json
+from flask import Markup
+from profanity import censor_profanity
 from flask import redirect
 from flask import url_for
 from flask import session
@@ -48,6 +50,23 @@ def get_all_emojis():
     with open("./emojis.json", 'rb') as f:
         emojis = json.load(f)
     return emojis
+
+def parse_message(content):
+    # Filter out any profanity from the message content
+    content = censor_profanity(content)
+    # Replace all emoji names with the actual emoji in the message content. This is done by slicing 
+    # the message content on the colon character and then trying to get each message fragment from
+    # the dict containing all the emojis. This is fast because of Big O time complexity
+    emoji_data = get_all_emojis()
+    m_content = content.split(":")
+    for emoji_name in m_content:
+        emoji = emoji_data.get(emoji_name.lower())
+        if emoji is not None:
+            content = content.replace(f":{emoji_name}:", emoji)
+    # Escape any html in the message if the user is not a superuser
+    if session.get("user").user_type != 1:
+        content = Markup.escape(content)
+    return content
 
 
 

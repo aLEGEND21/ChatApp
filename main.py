@@ -1,7 +1,6 @@
 from flask import Markup
 from flask_session import Session
 from flask_socketio import SocketIO
-from profanity import censor_profanity
 from flask_socketio import emit
 from time import time
 from flask import session
@@ -10,7 +9,7 @@ from config import Config
 from application.database import DataBase
 from application.message import Message
 from application import create_app
-from application.utils import get_all_emojis
+from application.utils import parse_message
 from application.utils import public_rooms
 from application.utils import ratelimits
 
@@ -62,20 +61,8 @@ def on_message_send(data, methods=["POST"]):
             if current_time - ratelimits[data["author_id"]] < 0.25:
                 return
         ratelimits[data["author_id"]] = current_time # Update the time when the last message was sent
-    data["content"] = censor_profanity(data["content"]) # Filter out any profanity from the message content
-    # Replace all emoji names with the actual emoji in the message content. This is done by slicing 
-    # the message content on the colon character and then trying to get each message fragment from
-    # the dict containing all the emojis. This is fast because of Big O time complexity
-    emoji_data = get_all_emojis()
-    m_content = data["content"].split(":")
-    for emoji_name in m_content:
-        emoji = emoji_data.get(emoji_name.lower())
-        if emoji is not None:
-            data["content"] = data["content"].replace(f":{emoji_name}:", emoji)
-    #data["content"] = emojize(data["content"]) # OLD
-    # Escape any html in the message if the user is not a superuser
-    if session.get("user").user_type != 1:
-        data["content"] = Markup.escape(data["content"])
+    # Parse the message contents and edit it if needed
+    data["content"] = parse_message(data["content"])
     # Construct the message object and add it to the database. Then, send the message to all clients
     m = Message(data["content"], data["author_id"], data["author_username"], data["room_code"])
     db = DataBase()
@@ -109,9 +96,11 @@ def on_message_edit(data, methods=["POST"]):
         methods (list, optional): _description_. Defaults to ["POST"].
     """
     data = dict(data)
-    # Escape any html in the message if the user is not a superuser
-    if session.get("user").user_type != 1:
-        data["new_content"] = Markup.escape(data["new_content"]) + Markup(' <small class="font-italic">(edited)</small>')
+    # Parse the message contents and edit it if needed
+    data["new_content"] = parse_message(data["new_content"])
+    # Add a message saying that the message was edited to the message content
+    data["new_content"] = data["new_content"] + Markup(' <small class="font-italic">(edited)</small>')
+    # Edit the message in the database and send out the message data to connected clients
     db = DataBase()
     db.edit_message(data["msg_id"], data["new_content"])
     db.close()
