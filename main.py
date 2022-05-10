@@ -99,7 +99,7 @@ def on_message_edit(data, methods=["POST"]):
     # Parse the message contents and edit it if needed
     data["new_content"] = parse_message(data["new_content"])
     # Add a message saying that the message was edited to the message content
-    data["new_content"] = data["new_content"] + Markup(' <small class="font-italic">(edited)</small>')
+    data["new_content"] = Markup(data["new_content"] + ' <small class="font-italic">(edited)</small>')
     # Edit the message in the database and send out the message data to connected clients
     db = DataBase()
     db.edit_message(data["msg_id"], data["new_content"])
