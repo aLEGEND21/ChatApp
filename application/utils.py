@@ -52,6 +52,15 @@ def get_all_emojis():
     return emojis
 
 def parse_message(content):
+    """Parse the message contents and remove profanity, replace emoji codes with the actual
+    emojis, and escape any html for non-superuser accounts. 
+
+    Args:
+        content (str): The contents of the message to parse
+
+    Returns:
+        str: The parsed and edited message contents
+    """
     # Filter out any profanity from the message content
     content = censor_profanity(content)
     # Replace all emoji names with the actual emoji in the message content. This is done by slicing 

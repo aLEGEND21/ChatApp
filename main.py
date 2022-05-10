@@ -69,6 +69,33 @@ def on_message_send(data, methods=["POST"]):
     db.add_message(m)
     db.close()
     emit('new message', m.to_dict(), broadcast=True)
+    # Scrape the message contents for commands if the user is a superuser
+    if session.get("user").user_type == 1:
+        # Get the command name and args from the message content
+        msg_args = data["content"].split(" ")
+        cmd_name = msg_args.pop(0)
+        # Purge command
+        if cmd_name in ["/purge"]:
+            # Try to get the number of messages to purge from the message args
+            try:
+                num_msgs_to_purge = int(msg_args[0]) + 1 # Add one to delete the message the superuser sent as well
+            except:
+                pass
+            else:
+                # Create the database instance, get all messages from the room, and delete the 
+                # number of messages specified in the reverse order. After each message is
+                # deleted, notify the client in order to have it deleted off all users' screens
+                db = DataBase()
+                all_msgs = db.get_room_messages(data["room_code"])
+                all_msgs.reverse()
+                for msg_num in range(0, num_msgs_to_purge):
+                    if msg_num + 1 > len(all_msgs):
+                        break
+                    else:
+                        msg = all_msgs[msg_num]
+                        db.delete_message(msg.msg_id)
+                        emit("message deleted", {"msg_id": msg.msg_id}, broadcast=True)
+                db.close()
 
 @socketio.on('room status update')
 def on_room_status_update(data, methods=["POST"]):
