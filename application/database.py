@@ -1,11 +1,194 @@
 import sqlite3
 import copy
+import pymongo
+import ssl
 
+from config import Config
 from .message import Message
 from .user import User
 
 
 class DataBase:
+
+    def __init__(self):
+        self.client = pymongo.MongoClient(Config.DB_CONNECTION_STRING, ssl_cert_reqs=ssl.CERT_NONE)
+        self.db = self.client["ChatApp"]
+        self.users = self.db["Users"]
+        self.messages = self.db["Messages"]
+    
+    def close(self):
+        pass
+
+    def add_user(self, user_object: User):
+        # Convert the user_object to JSON
+        user_dict = user_object.to_dict()
+        user_dict["_id"] = user_dict.pop("user_id")
+
+        # Update the users collection with the new user object
+        self.users.insert_one(user_dict)
+    
+    def get_all_users(self):
+        """Gets all users from the database and converts them into User objects.
+
+        Returns:
+            list[User]: A list of all users registered in the site
+        """
+        # Query the database for all the user data and convert it into User objects
+        user_objects = []
+        for user_dict in self.users.find():
+            user_objects.append(
+                User(
+                    user_dict["username"],
+                    user_dict["password"],
+                    user_dict["user_type"],
+                    user_dict["_id"]
+                )
+            )
+        
+        return user_objects
+
+    def get_user_by_id(self, user_id):
+        # Make the query to the database
+        user_data = self.users.find_one({"_id": user_id})
+        
+        # Check if the user was found
+        if user_data is None:
+            return False
+        
+        # Construct the user object using the user_data
+        user_object = User(
+            user_data["username"],
+            user_data["password"],
+            user_data["user_type"],
+            user_data["_id"]
+        )
+
+        return user_object
+    
+    def get_user_by_credentials(self, username: str, password: str):
+        # Make the query to the database
+        user_data = self.users.find_one({"username" : username, "password": password})
+        
+        # Check if the user was found
+        if user_data is None:
+            return False
+        
+        # Construct the user object using the user_data
+        user_object = User(
+            user_data["username"],
+            user_data["password"],
+            user_data["user_type"],
+            user_data["_id"]
+        )
+
+        return user_object
+    
+    def add_message(self, msg_object: Message):
+        # Format the message object data into JSON
+        msg_dict = {
+            "content": msg_object.content,
+            "author_id": msg_object.author_id,
+            "author_username": msg_object.author_username,
+            "timestamp": msg_object.timestamp,
+            "_id": msg_object.msg_id,
+            "room_code": msg_object.room_code
+        }
+
+        # Make the query to the database
+        self.messages.insert_one(msg_dict)
+    
+    def get_all_messages(self):
+        """Gets all messages from the message database.
+
+        Returns:
+            list[Message]: A list of Message objects containing the message data from the database.
+        """
+        message_data = self.messages.find()
+        
+        # Check if there were any messages in the database
+        if message_data is None:
+            return []
+        
+        # Construct the Message objects from the message dict
+        messages = []
+        for msg in message_data:
+            m = Message.construct_message(
+                msg["content"],
+                msg["author_id"],
+                msg["author_username"],
+                msg["timestamp"],
+                msg["room_code"],
+                msg["_id"]
+            )
+            messages.append(m)
+        
+        # Sort the messages from old -> new
+        messages.sort(key=lambda m: m.timestamp)
+
+        return messages
+    
+
+    def get_room_messages(self, room_code="GLOBAL"):
+        """Gets all messages sent in the specified chat room from the database and returns them.
+
+        Args:
+            room_code (str, optional): The code of the chat room. Defaults to "GLOBAL".
+        
+        Returns:
+            list[Message]: A list of Message objects that were sent in the chat room with the specified
+                room code.
+        """
+        message_data = self.messages.find()
+        
+        # Check if there were any messages in the database
+        if message_data is None:
+            return []
+
+        # Construct the Message objects from the message dict
+        messages = []
+        for msg in message_data:
+            # Skip over all messages that are not from the specified room
+            if msg["room_code"] != room_code:
+                continue
+            m = Message.construct_message(
+                msg["content"],
+                msg["author_id"],
+                msg["author_username"],
+                msg["timestamp"],
+                msg["room_code"],
+                msg["_id"]
+            )
+            messages.append(m)
+        
+        # Sort the messages from old -> new
+        messages.sort(key=lambda m: m.timestamp)
+
+        return messages
+    
+    def delete_all_messages(self):
+        """Removes all messages from the Messages collection in the database.
+        """
+        self.messages.delete_many({})
+    
+    def delete_message(self, msg_id: int):
+        """Deletes the specified message from the Messages collection.
+
+        Args:
+            msg_id (int): The unique id of the message to be deleted
+        """
+        self.messages.delete_one({"_id": int(msg_id)})
+    
+    def edit_message(self, msg_id: int, new_content: str):
+        """Edits the specified message from the Messages collection.
+        
+        Args:
+            msg_id (int): The unique id of the message to be edited
+            new_content (str): The new content of the message which will replace the existing content
+        """
+        self.messages.update_one({"_id": int(msg_id)}, {"$set": {"content": new_content}})
+
+
+class SQLiteDataBase:
 
     def __init__(self, db_path="database.db"):
         """Attempt to create a connection to the database via the provided path. Additionally,

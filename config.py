@@ -15,3 +15,4 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY")
     SERVER = os.getenv("SERVER")
     DEBUG = os.getenv("DEBUG")
+    DB_CONNECTION_STRING = os.getenv("DB_CONNECTION_STRING")

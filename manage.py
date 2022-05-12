@@ -28,9 +28,11 @@ elif action == 1:
 elif action == 2:
     username = input("Type the user's username: ")
     db = DataBase()
-    results = db.perform_query(f"SELECT * FROM Users WHERE username = ?", (username,)).fetchall()
+    #results = db.perform_query(f"SELECT * FROM Users WHERE username = ?", (username,)).fetchall()
+    results = db.get_all_users()
     if len(results) == 0:
         print("No users found")
     else:
         for user in results:
-            print(f"Username: {user[0]}, Password: {user[1]}")
+            if user.username == username:
+                print(f"Username: {user.username}, Password: {user.password}")

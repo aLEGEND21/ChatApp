@@ -2,6 +2,7 @@ import datetime
 import pytz
 import time
 import random
+from dateutil import tz
 
 
 class Message:
@@ -46,8 +47,12 @@ class Message:
         Returns:
             Message: A new message object
         """
-        if type(timestamp == str):
+        if type(timestamp) == str:
             timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f%z")
+        # Convert timestamp from UTC datetime to EST
+        elif type(timestamp) == datetime.datetime:
+            timestamp = timestamp.replace(tzinfo=tz.tzutc())
+            timestamp = timestamp.astimezone(tz.gettz("US/Eastern"))
         m = Message(content, author_id, author_username, room_code)
         m.timestamp = timestamp
         m.pretty_timestamp = m.timestamp.strftime("%I:%M %p on %A, %B %d %Y")
