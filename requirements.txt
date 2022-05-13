@@ -2,6 +2,6 @@ Flask==2.0.2
 Flask_SocketIO==5.1.1
 Flask_Session==0.4.0
 filter-profanity==1.0.9
-pymongo==3.12.1
+pymongo[srv]==3.12.1
 python-dotenv==0.20.0
 pytz==2022.1
