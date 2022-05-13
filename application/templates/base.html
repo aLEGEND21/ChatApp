@@ -4,6 +4,16 @@
     <!-- All the meta data -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="title" content="ChatApp - Chat With Anyone, Anywhere">
+    <meta name="description" content="Talk to anyone, anywhere around the globe, ad-free. Keep your conversations private with private chat rooms or make them public so anyone can join.">
+    <meta name="theme-color" content="#abd1c9ff">
+
+    <!-- Site title -->
+    {% if title %}
+        <title>ChatApp - {{ title }}</title>
+    {% else %}
+        <title>ChatApp - Chat With Anyone, Anywhere</title>
+    {% endif %}
 
     <!-- JS SocketIO import -->
     <script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>
