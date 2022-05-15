@@ -7,6 +7,22 @@
         Chat App User Data<br>
         <small class="text-muted">Showing Data For {{ users | length }} Users</small>
     </p>
+    <!--{% for user in users %}
+        <div class="card">
+            <div class="card-header">
+                <button class="btn" data-toggle="collapse" data-target="#collapse-{{ user.user_id }}">
+                    <span class="material-symbols-outlined">menu_open</span>
+                </button>
+                Username: <strong>{{ user.username }}</strong>
+                User ID: <strong>{{ user.user_id }}</strong>
+            </div>
+            <div id="collapse-{{ user.user_id }}" class="collapse collapsed">
+                <div class="card-body">
+                    Hello World
+                </div>
+            </div>
+        </div>
+    {% endfor %}-->
     <table class="table table-striped mt-3">
         <thead>
             <tr>

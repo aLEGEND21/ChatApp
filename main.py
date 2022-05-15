@@ -64,7 +64,7 @@ def on_message_send(data, methods=["POST"]):
     # Parse the message contents and edit it if needed
     data["content"] = parse_message(data["content"])
     # Construct the message object and add it to the database. Then, send the message to all clients
-    m = Message(data["content"], data["author_id"], data["author_username"], data["room_code"])
+    m = Message(data["content"], data["author_id"], data["author_username"], data["room_code"], data["replying_to"])
     db = DataBase()
     db.add_message(m)
     db.close()

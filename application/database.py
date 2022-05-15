@@ -91,7 +91,8 @@ class DataBase:
             "author_username": msg_object.author_username,
             "timestamp": msg_object.timestamp,
             "_id": msg_object.msg_id,
-            "room_code": msg_object.room_code
+            "room_code": msg_object.room_code,
+            "replying_to": msg_object.replying_to
         }
 
         # Make the query to the database
@@ -118,7 +119,8 @@ class DataBase:
                 msg["author_username"],
                 msg["timestamp"],
                 msg["room_code"],
-                msg["_id"]
+                msg["_id"],
+                msg["replying_to"]
             )
             messages.append(m)
         
@@ -156,7 +158,8 @@ class DataBase:
                 msg["author_username"],
                 msg["timestamp"],
                 msg["room_code"],
-                msg["_id"]
+                msg["_id"],
+                msg["replying_to"]
             )
             messages.append(m)
         
@@ -363,7 +366,7 @@ class SQLiteDataBase:
         # Construct the Message objects from the remaining tuple data
         messages = []
         for msg in message_tuples:
-            m = Message.construct_message(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5])
+            m = Message.construct_message(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6])
             messages.append(m)
         
         # Sort the messages from old -> new

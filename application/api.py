@@ -50,3 +50,21 @@ def get_room_code():
         dict: A dict containing the room code
     """
     return {"room_code": session.get("room_code")}
+
+@api.route("/get_message_by_id/<msg_id>")
+def get_message_by_id(msg_id):
+    """Gets a message using the message's ID.
+
+    Args:
+        msg_id (int): The unique ID of the message to find
+
+    Returns:
+        dict: A dict containing the message data or an empty dict if the message was not found
+    """
+    db = DataBase()
+    for msg in db.get_all_messages():
+        if msg.msg_id == int(msg_id):
+            print(msg.to_dict())
+            return msg.to_dict()
+    else:
+        return {}

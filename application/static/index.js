@@ -15,6 +15,13 @@ async function getRoomCode () {
         });
 }
 
+function getMessageById (msgId) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", "/api/get_message_by_id/" + msgId, false ); // false for synchronous request
+    xmlHttp.send( null );
+    return JSON.parse(xmlHttp.responseText);
+}
+
 function addMessage (m, loadingMessages) {
     let messageContainer = document.getElementById("message-container");
     let messageDiv = document.createElement("div");
@@ -27,36 +34,55 @@ function addMessage (m, loadingMessages) {
         mentionStyle = "border-width: 4px !important; border-color: var(--blue-green) !important;";
     }
     // Display the buttons for message authors and superusers
-    buttons = ""
+    buttons = `
+        <button type="button" class="btn btn-outline-secondary btn-sm" style="padding: 1px 1px 0px 1px;" onclick="replyButtonListener(this)">
+            <span class="material-symbols-outlined">reply</span>
+        </button>
+    `
     if (userData.username == m.author_username || userData.user_type == 1) {
-        buttons = `
-                    <button type="button" class="btn btn-outline-secondary btn-sm" style="padding: 1px 1px 0px 1px;" onclick="editButtonListener(this)">
-                        <span class="material-symbols-outlined">edit</span>
-                    </button>
-                    <button type="button" class="btn btn-outline-danger btn-sm" style="padding: 1px 1px 0px 1px;" onclick="deleteButtonListener(this)">
-                        <span class="material-symbols-outlined">delete</span>
-                    </button>
+        buttons = buttons + `
+            <button type="button" class="btn btn-outline-secondary btn-sm" style="padding: 1px 1px 0px 1px;" onclick="editButtonListener(this)">
+                <span class="material-symbols-outlined">edit</span>
+            </button>
+            <button type="button" class="btn btn-outline-danger btn-sm" style="padding: 1px 1px 0px 1px;" onclick="deleteButtonListener(this)">
+                <span class="material-symbols-outlined">delete</span>
+            </button>
         `
+    }
+    // Add the message being replied to if the user is replying to a message
+    reply = ""
+    if (m.replying_to != 0) {
+        replyTargetMsg = getMessageById(m.replying_to);
+        if (replyTargetMsg.content != undefined) {
+            reply = `
+                <div class="text-secondary text-truncate mt--1 ml--3 mb-1 mr-5 pl-5">
+                    <span><strong>${replyTargetMsg.author_username}</strong></span>
+                    <span class="font-weight-light text-truncate">${replyTargetMsg.content}</span>
+                </div>
+            `
+        }
     }
     // Change the color of the message depending on who sent it
     if (m.author_username == userData.username) {
         var content =  `<div class="pt-4 pb-2 pl-5 pr-5 bg-grey ${mentionCls}" style="${mentionStyle}" id="msg-${m.msg_id}">
+                            ${reply}
                             <div class="d-inline-flex">
                                 <span class="h6"><strong>You</strong></span>
                                 <span class="h6 font-weight-light pl-3">${m.timestamp}</span>
                             </div>
-                            <div class="d-inline float-right mt--1 mr--2" id="icons">
+                            <div class="d-inline float-right mr--2" id="icons">
                                 ${buttons}
                             </div>
                             <p class="text-secondary text-break" id="content">${m.content}</p>
                         </div>`;
     } else {
         var content =  `<div class="pt-4 pb-2 pl-5 pr-5 ${mentionCls}" style="${mentionStyle}" id="msg-${m.msg_id}">
+                            ${reply}
                             <div class="d-inline-flex pr-1">
                                 <span class="h6">${m.author_username}</span>
                                 <span class="h6 font-weight-light pl-3">${m.timestamp}</span>
                             </div>
-                            <div class="d-inline float-right mt--1 mr--2" id="icons">
+                            <div class="d-inline float-right mr--2" id="icons">
                                 ${buttons}
                             </div>
                             <p class="text-secondary text-break" id="content">${m.content}</p>
@@ -141,6 +167,7 @@ var socket = io.connect(document.domain + ":" + location.port);
 var userData;
 var roomCode;
 var notified = false; // Shows whether the user has been already been notified about a new message
+var replyingTo = 0; // 0 is used if the user is not replying to a message while the message id is used if the user is replying to a message
 
 // Create global roomStatus html object
 var roomStatus = document.createElement("button");
@@ -244,9 +271,11 @@ document.addEventListener("keypress", function (event) {
                 "content": msgSendBox.value,
                 "author_id": userData.user_id,
                 "author_username": userData.username,
-                "room_code": roomCode
+                "room_code": roomCode,
+                "replying_to": replyingTo
             });
             msgSendBox.value = "";
+            replyingTo = 0;
         }
         
         // Navigate to a new room if the user presses enter while the room code input is active
@@ -276,6 +305,17 @@ function roomStatusToggleListener (statusDisplay) {
         }
         socket.emit("room status update", data);
     }
+}
+
+// Listen to when the reply button is pressed and show the reply UI
+function replyButtonListener (btn) {
+    let targetMsgContainer = btn.parentElement.parentElement;
+    let targetMsgId = targetMsgContainer.getAttribute("id").split("-")[1];
+    replyingTo = targetMsgId;
+    document.getElementById("message-send-box").focus(); // All the user to start replying immediately
+    // TODO: Show the message editing UI
+    // Also, when a message is edited, make the messages that are replying to it have their quote from the edited message edited
+    // This means that there needs to be some class that replying messages have
 }
 
 // Listen to when the edit button is clicked on a message and edit the UI so that the user can edit the message
