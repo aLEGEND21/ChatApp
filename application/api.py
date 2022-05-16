@@ -64,7 +64,6 @@ def get_message_by_id(msg_id):
     db = DataBase()
     for msg in db.get_all_messages():
         if msg.msg_id == int(msg_id):
-            print(msg.to_dict())
             return msg.to_dict()
     else:
         return {}

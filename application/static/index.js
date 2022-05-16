@@ -15,14 +15,18 @@ async function getRoomCode () {
         });
 }
 
-function getMessageById (msgId) {
+async function getMessageById (msgId) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", "/api/get_message_by_id/" + msgId, false ); // false for synchronous request
     xmlHttp.send( null );
     return JSON.parse(xmlHttp.responseText);
+    /*return await fetch("/api/get_message_by_id/" + msgId)
+        .then(async function (resp) {
+            return await resp.json();
+        });*/ // Messages do not scroll into view
 }
 
-function addMessage (m, loadingMessages) {
+async function addMessage (m, loadingMessages) {
     let messageContainer = document.getElementById("message-container");
     let messageDiv = document.createElement("div");
     messageContainer.appendChild(messageDiv);
@@ -52,7 +56,7 @@ function addMessage (m, loadingMessages) {
     // Add the message being replied to if the user is replying to a message
     reply = ""
     if (m.replying_to != 0) {
-        replyTargetMsg = getMessageById(m.replying_to);
+        replyTargetMsg = await getMessageById(m.replying_to);
         if (replyTargetMsg.content != undefined) {
             reply = `
                 <div class="text-secondary text-truncate mt--1 ml--3 mb-1 mr-5 pl-5">
@@ -194,9 +198,9 @@ socket.on("connect", async function () {
 socket.on("after connection", async function (data) {
     // Add all the messages to the screen and scroll to the bottom
     let messages = data.messages;
-    messages.forEach(m => {
+    messages.forEach(async (m) => {
         if (m.room_code == roomCode) {
-            addMessage(m, true);
+            await addMessage(m, true);
         }
     });
     let messageContainer = document.getElementById("message-container");
@@ -215,7 +219,7 @@ socket.on("after connection", async function (data) {
 // Display new message onto the screen when the server sends the message data
 socket.on("new message", async function (message) {
     if (message.room_code == roomCode) {
-        addMessage(message, false);
+        await addMessage(message, false);
     }
 })
 
