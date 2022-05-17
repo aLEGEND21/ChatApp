@@ -56,7 +56,16 @@ async function addMessage (m, loadingMessages) {
     // Add the message being replied to if the user is replying to a message
     reply = ""
     if (m.replying_to != 0) {
-        replyTargetMsg = await getMessageById(m.replying_to);
+        // Get the messages from the cache if the messages are being loaded, since they will be up to date
+        if (loadingMessages) {
+            cachedMsgs.forEach(function (cacheM) {
+                if (cacheM.msg_id == m.msg_id) {
+                    replyTargetMsg = cacheM;
+                }
+            });
+        } else {
+            replyTargetMsg = await getMessageById(m.replying_to);
+        }
         if (replyTargetMsg.content != undefined) {
             reply = `
                 <div class="text-secondary text-truncate mt--1 ml--3 mb-1 mr-5 pl-5">
@@ -170,6 +179,7 @@ function editConfirmed (msgContainer) {
 var socket = io.connect(document.domain + ":" + location.port);
 var userData;
 var roomCode;
+var cachedMsgs; // Stores some of the messages that were previously sent
 var notified = false; // Shows whether the user has been already been notified about a new message
 var replyingTo = 0; // 0 is used if the user is not replying to a message while the message id is used if the user is replying to a message
 
@@ -198,6 +208,7 @@ socket.on("connect", async function () {
 socket.on("after connection", async function (data) {
     // Add all the messages to the screen and scroll to the bottom
     let messages = data.messages;
+    cachedMsgs = data.messages; // Updated the message cache
     messages.forEach(async (m) => {
         if (m.room_code == roomCode) {
             await addMessage(m, true);
