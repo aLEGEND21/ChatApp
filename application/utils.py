@@ -1,5 +1,6 @@
 import functools
 import json
+import re
 from flask import Markup
 from profanity import censor_profanity
 from flask import redirect
@@ -74,7 +75,23 @@ def parse_message(content):
             content = content.replace(f":{emoji_name}:", emoji)
     # Escape any html in the message if the user is not a superuser
     if session.get("user").user_type != 1:
-        content = Markup.escape(content)
+        content = str(Markup.escape(content))
+    # Convert **<word>** into a bolded <word>
+    boldRegex = re.compile(r'\*\*(.*?)\*\*')
+    for result in boldRegex.findall(content):
+        content = content.replace(f"**{result}**", f"<b>{result}</b>")
+    # Convert *<word>* into a italicized <word>
+    italicRegex = re.compile(r'\*(.*?)\*')
+    for result in italicRegex.findall(content):
+        content = content.replace(f"*{result}*", f"<i>{result}</i>")
+    # Convert __<word>__ into underlined <word>
+    underlineRegex = re.compile(r'__(.*?)__')
+    for result in underlineRegex.findall(content):
+        content = content.replace(f"__{result}__", f"<u>{result}</u>")
+    # Detect urls and make them clickable
+    urlRegex = re.compile(r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))")
+    for result in urlRegex.findall(content):
+        content = content.replace(result[0], f'<a href="{result[0]}" target="_blank">{result[0]}</a>')
     return content
 
 
