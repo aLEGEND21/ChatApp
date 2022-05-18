@@ -16,3 +16,4 @@ class Config:
     SERVER = os.getenv("SERVER")
     DEBUG = os.getenv("DEBUG")
     DB_CONNECTION_STRING = os.getenv("DB_CONNECTION_STRING")
+    SITE_URL = os.getenv("SITE_URL")

@@ -1,4 +1,5 @@
 from flask import Blueprint
+from replit import db
 from flask import request
 from flask import session
 
@@ -67,3 +68,7 @@ def get_message_by_id(msg_id):
             return msg.to_dict()
     else:
         return {}
+
+@api.route("/get_database_url")
+def get_database_url():
+    return {"db_url": db.db_url}
