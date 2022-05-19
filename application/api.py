@@ -63,12 +63,12 @@ def get_message_by_id(msg_id):
         dict: A dict containing the message data or an empty dict if the message was not found
     """
     db = DataBase()
-    for msg in db.get_all_messages():
-        if msg.msg_id == int(msg_id):
-            return msg.to_dict()
+    m = db.get_message(int(msg_id))
+    if m is not None:
+        return m.to_dict()
     else:
         return {}
 
-@api.route("/get_database_url")
+'''@api.route("/get_database_url")
 def get_database_url():
-    return {"db_url": db.db_url}
+    return {"db_url": db.db_url}'''

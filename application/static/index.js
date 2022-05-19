@@ -59,7 +59,7 @@ async function addMessage (m, loadingMessages) {
         // Get the messages from the cache if the messages are being loaded, since they will be up to date
         if (loadingMessages) {
             cachedMsgs.forEach(function (cacheM) {
-                if (cacheM.msg_id == m.msg_id) {
+                if (cacheM.msg_id == m.replying_to) {
                     replyTargetMsg = cacheM;
                 }
             });

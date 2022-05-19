@@ -64,6 +64,6 @@ class Message:
         m = Message(content, author_id, author_username, room_code)
         m.timestamp = timestamp
         m.pretty_timestamp = m.timestamp.strftime("%I:%M %p on %A, %B %d %Y")
-        m.msg_id = msg_id
+        m.msg_id = int(msg_id)
         m.replying_to = replying_to
         return m

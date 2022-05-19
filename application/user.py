@@ -17,6 +17,7 @@ class User:
         if self.user_id is None:
             time_created = round(time.time())
             self.user_id = str(time_created) + str(random.randint(1000, 9999))
+        self.user_id = int(self.user_id)
     
     def to_dict(self):
         """Convert the user object into a dictionary so that it can be sent through the socket or 
