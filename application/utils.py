@@ -52,6 +52,28 @@ def get_all_emojis():
         emojis = json.load(f)
     return emojis
 
+def markup_str(content: str, markup_chars: str, query_chars: str, replace_with: list):
+    """Marks up parts of a string with html if they are surrounded by the markup char. This is useful
+    to allow users to add variance to their messages while making sure that only safe characters are being
+    used when they are adding variance to their messages.
+
+    Args:
+        content (str): The content of the message to be processed
+        markup_chars (str): The escaped characters to supply to the regex
+        query_chars (str): The exact characters to look for when replacing chars in the string
+        replace_with (list): The html to replace the characters with. The opening tag and closing tag
+            should be seperate elements in the list.
+
+    Returns:
+        str: The marked up message content
+    """
+    regex = re.compile(f'{markup_chars}(.*?){markup_chars}')
+    for result in regex.findall(content):
+        replace_str = query_chars + result + query_chars
+        new_str = replace_with[0] + result + replace_with[1]
+        content = content.replace(replace_str, new_str)
+    return content
+
 def parse_message(content):
     """Parse the message contents and remove profanity, replace emoji codes with the actual
     emojis, and escape any html for non-superuser accounts. 
@@ -62,8 +84,6 @@ def parse_message(content):
     Returns:
         str: The parsed and edited message contents
     """
-    # Filter out any profanity from the message content
-    content = censor_profanity(content)
     # Replace all emoji names with the actual emoji in the message content. This is done by slicing 
     # the message content on the colon character and then trying to get each message fragment from
     # the dict containing all the emojis. This is fast because of Big O time complexity
@@ -73,25 +93,24 @@ def parse_message(content):
         emoji = emoji_data.get(emoji_name.lower())
         if emoji is not None:
             content = content.replace(f":{emoji_name}:", emoji)
+    
     # Escape any html in the message if the user is not a superuser
     if session.get("user").user_type != 1:
         content = str(Markup.escape(content))
-    # Convert **<word>** into a bolded <word>
-    boldRegex = re.compile(r'\*\*(.*?)\*\*')
-    for result in boldRegex.findall(content):
-        content = content.replace(f"**{result}**", f"<b>{result}</b>")
-    # Convert *<word>* into a italicized <word>
-    italicRegex = re.compile(r'\*(.*?)\*')
-    for result in italicRegex.findall(content):
-        content = content.replace(f"*{result}*", f"<i>{result}</i>")
-    # Convert __<word>__ into underlined <word>
-    underlineRegex = re.compile(r'__(.*?)__')
-    for result in underlineRegex.findall(content):
-        content = content.replace(f"__{result}__", f"<u>{result}</u>")
+    
+    # Markup up the message content based on what markup characters the user used in their message
+    content = markup_str(content, r'\*\*', "**", ["<b>", "</b>"]) # Bolded
+    content = markup_str(content, r'\*', "*", ["<i>", "</i>"]) # Italicized
+    content = markup_str(content, r'\_\_', "__", ["<u>", "</u>"]) # Underlined
+    
     # Detect urls and make them clickable
     urlRegex = re.compile(r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))")
     for result in urlRegex.findall(content):
         content = content.replace(result[0], f'<a href="{result[0]}" target="_blank">{result[0]}</a>')
+    
+    # Filter out any profanity from the message content
+    content = censor_profanity(content)
+    
     return content
 
 
