@@ -1,7 +1,7 @@
 import functools
 import json
 import re
-from flask import Markup
+from markupsafe import Markup
 from profanity import censor_profanity
 from flask import redirect
 from flask import url_for

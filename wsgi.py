@@ -1,7 +1,7 @@
-from flask import Markup
 from flask_session import Session
 from flask_socketio import SocketIO
 from flask_socketio import emit
+from markupsafe import Markup
 from time import time
 from flask import session
 

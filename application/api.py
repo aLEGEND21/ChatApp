@@ -1,5 +1,4 @@
 from flask import Blueprint
-from replit import db
 from flask import request
 from flask import session
 
