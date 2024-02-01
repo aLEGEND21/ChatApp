@@ -1,8 +1,6 @@
 import sqlite3
 import copy
 import pymongo
-import requests
-import ssl
 
 from config import Config
 from .message import Message
