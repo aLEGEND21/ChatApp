@@ -151,4 +151,4 @@ def on_message_delete(data, methods=["POST"]):
 
 # Mainline
 if __name__ == "__main__":
-    socketio.run(app, debug=Config.DEBUG, host=Config.SERVER)
+    socketio.run(app, debug=Config.DEBUG, host=Config.HOST, port=Config.PORT)
