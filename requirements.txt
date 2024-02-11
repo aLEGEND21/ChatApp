@@ -3,7 +3,7 @@ Flask_SocketIO==5.3.6
 Flask_Session==0.6.0
 filter-profanity==1.0.9
 MarkupSafe==2.1.1
-pymongo[srv]==3.12.1
+pymongo==4.3.2
 python-dateutil==2.8.2
 python-dotenv==0.20.0
-pytz==2022.1
+pytz==2022.5
