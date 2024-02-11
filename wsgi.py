@@ -24,7 +24,7 @@ app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
 # Configure the socket interface
-socketio = SocketIO(app)
+socketio = SocketIO(app, logger=True, engineio_logger=True, cors_allowed_origins="*")
 
 
 # Socket events
