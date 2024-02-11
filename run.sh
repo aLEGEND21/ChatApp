@@ -5,4 +5,4 @@ echo removing old container
 sudo docker rm -f chatapp
 
 echo starting container
-sudo docker run -d --name chatapp -p 5000:5000 --network=nginx-proxy --env-file=.env chatapp
+sudo docker run -d --name chatapp -p 5000:5000 --network=nginx-proxy --env-file=./env chatapp
