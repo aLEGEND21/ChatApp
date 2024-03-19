@@ -100,6 +100,7 @@ def parse_message(content):
         content = str(Markup.escape(content))
     else:
         content = str(markdown(content)) # NOTE: This is experimental since markdown content in messages doesn't render correctly with deletes/edits
+        content = content.replace("<p>", "").replace("</p>", "") # Remove the <p> tags from the message so that it renders correctly
     
     # Markup up the message content based on what markup characters the user used in their message
     content = markup_str(content, r'\*\*', "**", ["<b>", "</b>"]) # Bolded
