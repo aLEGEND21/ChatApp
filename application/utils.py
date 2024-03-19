@@ -2,6 +2,7 @@ import functools
 import json
 import re
 from markupsafe import Markup
+from markdown import markdown
 from profanity import censor_profanity
 from flask import redirect
 from flask import url_for
@@ -94,9 +95,11 @@ def parse_message(content):
         if emoji is not None:
             content = content.replace(f":{emoji_name}:", emoji)
     
-    # Escape any html in the message if the user is not a superuser
+    # Escape any html in the message if the user is not a superuser. Otherwise, convert the markdown into html
     if session.get("user").user_type != 1:
         content = str(Markup.escape(content))
+    else:
+        content = str(markdown(content)) # NOTE: This is experimental since markdown content in messages doesn't render correctly with deletes/edits
     
     # Markup up the message content based on what markup characters the user used in their message
     content = markup_str(content, r'\*\*', "**", ["<b>", "</b>"]) # Bolded

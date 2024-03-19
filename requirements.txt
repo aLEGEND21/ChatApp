@@ -2,6 +2,7 @@ Flask==3.0.0
 Flask_SocketIO==5.3.6
 Flask_Session==0.6.0
 filter-profanity==1.0.9
+markdown==3.4.1
 MarkupSafe==2.1.1
 pymongo==4.3.2
 python-dateutil==2.8.2
